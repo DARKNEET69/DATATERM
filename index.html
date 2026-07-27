@@ -488,6 +488,7 @@ td.source-cell { color: var(--color-purple); font-size: 12px; }
       <input type="text" id="searchInput" placeholder="Поиск по базе DATATERM...">
     </div>
     <div class="header-actions">
+      <div id="auth-container" style="margin-right:8px;"></div>
       <div class="view-toggle">
         <button id="viewTable" class="active" title="Таблица"><i class="fas fa-table"></i></button>
         <button id="viewCards" title="Карточки"><i class="fas fa-th"></i></button>
@@ -534,295 +535,122 @@ td.source-cell { color: var(--color-purple); font-size: 12px; }
   </div>
 </div>
 
-<script>
-// ============ DATABASE ============
-const DB = [
-  // FASHIONWARE
-  {cat:'fashionware', name:'Биомонитор (Biomonitor)', type:'Fashion', surg:'N', desc:'+2 к сопротивлению пыткам и наркотикам', cost:100, hl:1, source:'CP20', icon:'fa-heart-pulse'},
-  {cat:'fashionware', name:'Продвинутый биомонитор', type:'Fashion', surg:'MA', desc:'Трансляция данных на 2 км', cost:200, hl:2, source:'CB3', icon:'fa-heart-pulse'},
-  {cat:'fashionware', name:'Подкожные часы (Skinwatch)', type:'Fashion', surg:'N', desc:'Встроенные часы под кожей', cost:50, hl:1, source:'CP20', icon:'fa-clock'},
-  {cat:'fashionware', name:'Световая татуировка', type:'Fashion', surg:'N', desc:'Декоративная светящаяся татуировка', cost:20, hl:0.5, source:'CP20', icon:'fa-pen-nib'},
-  {cat:'fashionware', name:'Хим-кожа (ChemSkins)', type:'Fashion', surg:'N', desc:'Химическое изменение оттенка кожи', cost:200, hl:3, source:'CP20', icon:'fa-palette'},
-  {cat:'fashionware', name:'Синт-кожа (Synthskins)', type:'Fashion', surg:'N', desc:'Искусственная кожа с узорами', cost:400, hl:5, source:'CP20', icon:'fa-palette'},
-  {cat:'fashionware', name:'Кожа настроения (Mood Skin)', type:'Fashion', surg:'N', desc:'Меняет цвет в зависимости от настроения', cost:200, hl:5, source:'Chr3', icon:'fa-palette'},
-  {cat:'fashionware', name:'ТВ-кожа Nu-Tek', type:'Fashion', surg:'M', desc:'Кожа становится видеоэкраном', cost:600, hl:7, source:'Chr4', icon:'fa-tv'},
-  {cat:'fashionware', name:'Тех-волосы (Techhair)', type:'Fashion', surg:'M', desc:'Светящиеся/цветные искусственные волосы', cost:150, hl:2, source:'CP20', icon:'fa-head-side'},
-  {cat:'fashionware', name:'Дисплей фрагов (Kill Display)', type:'Fashion', surg:'N', desc:'3-значный счётчик убийств', cost:100, hl:1, source:'Chr2', icon:'fa-skull'},
-  {cat:'fashionware', name:'Ногти "Включайся"', type:'Fashion', surg:'N', desc:'Ногти, меняющие цвет', cost:200, hl:1, source:'Chr3', icon:'fa-hand-sparkles'},
-  // NEURALWARE
-  {cat:'neuralware', name:'Нейронный процессор', type:'Neural', surg:'M', desc:'Базовый процессор (обязателен для всех систем)', cost:1000, hl:5, source:'CP20', icon:'fa-microchip'},
-  {cat:'neuralware', name:'Улучшенный процессор ЦРУ', type:'Neural', surg:'M', desc:'Чипы навыков +8, риск снижения INT', cost:2000, hl:5, source:'RM', icon:'fa-microchip'},
-  {cat:'neuralware', name:'Бустер Керензикова', type:'Neural', surg:'N', desc:'+1 к Инициативе за уровень (до +2)', cost:500, hl:5, source:'CP20', icon:'fa-bolt'},
-  {cat:'neuralware', name:'Ускоритель Сандевистан', type:'Neural', surg:'N', desc:'+3 к Инициативе на 5 ходов', cost:1600, hl:5, source:'CP20', icon:'fa-bolt'},
-  {cat:'neuralware', name:'Ускоритель Ubermensch', type:'Neural', surg:'N', desc:'+2 к Инициативе на 5 ходов', cost:1600, hl:5, source:'ET', icon:'fa-bolt'},
-  {cat:'neuralware', name:'Тактильное усиление', type:'Neural', surg:'N', desc:'Повышенная осязательная чувствительность (+2)', cost:100, hl:2, source:'CP20', icon:'fa-hand'},
-  {cat:'neuralware', name:'Обонятельное усиление', type:'Neural', surg:'N', desc:'Усиленное обоняние (+2 Awareness)', cost:100, hl:2, source:'CP20', icon:'fa-wind'},
-  {cat:'neuralware', name:'Редактор боли', type:'Neural', surg:'N', desc:'Снижение сложности проверок Выносливости', cost:200, hl:10, source:'CP20', icon:'fa-shield-heart'},
-  {cat:'neuralware', name:'Линк смартгана', type:'Neural', surg:'N', desc:'+2 к атакам из смартгана', cost:100, hl:2, source:'CP20', icon:'fa-link'},
-  {cat:'neuralware', name:'Транспортный линк', type:'Neural', surg:'N', desc:'+2 к управлению кибер-транспортом', cost:100, hl:3, source:'CP20', icon:'fa-car'},
-  {cat:'neuralware', name:'Интерфейсные разъемы', type:'Neural', surg:'M', desc:'Прямое подключение к смартганам', cost:200, hl:5, source:'CP20', icon:'fa-plug'},
-  {cat:'neuralware', name:'Разъем для чипов', type:'Neural', surg:'N', desc:'Гнездо на 10 чипов', cost:200, hl:5, source:'CP20', icon:'fa-sim-card'},
-  {cat:'neuralware', name:'Позитронный усилитель', type:'Neural', surg:'MA', desc:'+2 к INT, риск перегрузки (10%)', cost:2000, hl:5, source:'I1.3', icon:'fa-brain'},
-  {cat:'neuralware', name:'Блок "Проводная голова"', type:'Neural', surg:'M', desc:'Стимуляция центров удовольствия мозга', cost:1500, hl:0, source:'I2.1', icon:'fa-brain'},
-  // CYBEROPTIC
-  {cat:'cyberoptic', name:'Базовый кибероптический глаз', type:'Cyberoptic', surg:'MA', desc:'Базовый модуль глаза (4 слота для опций)', cost:500, hl:10, source:'CP20', icon:'fa-eye'},
-  {cat:'cyberoptic', name:'Дистанционный глаз', type:'Cyberoptic', surg:'MA', desc:'Трансляция на 100м', cost:1500, hl:15, source:'Chr2', icon:'fa-eye'},
-  {cat:'cyberoptic', name:'Глаз-насекомое (Bug Eye)', type:'Cyberoptic', surg:'MA', desc:'Вмещает 6 опций', cost:750, hl:15, source:'Chr3', icon:'fa-eye'},
-  {cat:'cyberoptic', name:'Третий глаз', type:'Cyberoptic', surg:'CR', desc:'Максимум 2 доп. глаза. ATTR -1 за глаз', cost:750, hl:15, source:'Chr3', icon:'fa-eye'},
-  {cat:'cyberoptic', name:'Kiroshi MonoVision', type:'Cyberoptic', surg:'MA', desc:'6 слотов, +1 Notice, бонус инициативы', cost:650, hl:15, source:'Chr4', icon:'fa-eye'},
-  {cat:'cyberoptic', name:'Прицельная сетка', type:'Optic Opt', surg:'N', desc:'+1 ко всем атакам Смартгана', cost:400, hl:2, source:'CP20', icon:'fa-crosshairs'},
-  {cat:'cyberoptic', name:'Телеоптика', type:'Optic Opt', surg:'N', desc:'Возможность телескопа до 20x', cost:150, hl:0.5, source:'CP20', icon:'fa-binoculars'},
-  {cat:'cyberoptic', name:'Усиление слабого света', type:'Optic Opt', surg:'N', desc:'Видимость в сумерках', cost:200, hl:0.5, source:'CP20', icon:'fa-moon'},
-  {cat:'cyberoptic', name:'Инфракрасное зрение', type:'Optic Opt', surg:'N', desc:'Видимость в полной темноте', cost:200, hl:1, source:'CP20', icon:'fa-temperature-high'},
-  {cat:'cyberoptic', name:'Термограф', type:'Optic Opt', surg:'N', desc:'Видимость тепловых узоров', cost:200, hl:1, source:'CP20', icon:'fa-temperature-high'},
-  {cat:'cyberoptic', name:'Анти-ослепление', type:'Optic Opt', surg:'N', desc:'Иммунитет к вспышкам и лазерам', cost:200, hl:0.5, source:'CP20', icon:'fa-sun'},
-  {cat:'cyberoptic', name:'Микро-видео оптика', type:'Optic Opt', surg:'N', desc:'Запись до 20 минут видео (2 слота)', cost:300, hl:0.5, source:'CP20', icon:'fa-video'},
-  {cat:'cyberoptic', name:'Игольник (Dartgun)', type:'Optic Opt', surg:'N', desc:'1 ядовитая игла. Дальность 1м (3 слота)', cost:200, hl:2, source:'CP20', icon:'fa-bullseye'},
-  {cat:'cyberoptic', name:'Оптический лазер', type:'Optic Opt', surg:'N', desc:'Урон 2d6, 1 выстрел, 0.5м (3 слота)', cost:800, hl:3, source:'P1', icon:'fa-bolt'},
-  // CYBERAUDIO
-  {cat:'cyberaudio', name:'Базовый кибераудио модуль', type:'Cyberaudio', surg:'M', desc:'Базовый слуховой модуль (6 слотов)', cost:500, hl:10, source:'CP20', icon:'fa-headphones'},
-  {cat:'cyberaudio', name:'Усиленный слух', type:'Audio Opt', surg:'N', desc:'+1 Awareness (звук)', cost:200, hl:1, source:'CP20', icon:'fa-ear-listen'},
-  {cat:'cyberaudio', name:'Радиолинк', type:'Audio Opt', surg:'N', desc:'Радиосвязь до 1 мили', cost:100, hl:1, source:'CP20', icon:'fa-radio'},
-  {cat:'cyberaudio', name:'Телефонный узел', type:'Audio Opt', surg:'N', desc:'Полная сотовая связь', cost:150, hl:1, source:'CP20', icon:'fa-phone'},
-  {cat:'cyberaudio', name:'Скремблер', type:'Audio Opt', surg:'N', desc:'Кодирование связи', cost:100, hl:0.5, source:'CP20', icon:'fa-lock'},
-  {cat:'cyberaudio', name:'Детектор жучков', type:'Audio Opt', surg:'N', desc:'Обнаружение до 3м. Эффективность 60%', cost:200, hl:0.5, source:'CP20', icon:'fa-bug'},
-  {cat:'cyberaudio', name:'Анализатор голоса', type:'Audio Opt', surg:'N', desc:'+2 к Human Perception, Interrogation', cost:200, hl:1, source:'CP20', icon:'fa-wave-square'},
-  {cat:'cyberaudio', name:'Демпфер уровня', type:'Audio Opt', surg:'N', desc:'Авто-компенсация шума. -25% от Stun', cost:300, hl:0.5, source:'CP20', icon:'fa-volume-xmark'},
-  {cat:'cyberaudio', name:'Маячок (Homing Tracer)', type:'Audio Opt', surg:'N', desc:'Слежение за целью до 1 км', cost:200, hl:0.5, source:'CP20', icon:'fa-location-dot'},
-  // CYBERLIMBS
-  {cat:'cyberlimbs', name:'Стандартная киберрука', type:'Cyberlimb', surg:'CR', desc:'20/30 SDP, 4 слота, удар 1d6', cost:3000, hl:10, source:'CP20', icon:'fa-hand-fist'},
-  {cat:'cyberlimbs', name:'Стандартная кибернога', type:'Cyberlimb', surg:'CR', desc:'20/30 SDP, 3 слота, удар 2d6', cost:2000, hl:10, source:'CP20', icon:'fa-person-walking'},
-  {cat:'cyberlimbs', name:'Кристаллическая рука', type:'Cyberlimb', surg:'CR', desc:'50/60 SDP, 4 слота, удар 1d6', cost:7000, hl:10, source:'Chr1', icon:'fa-hand-fist'},
-  {cat:'cyberlimbs', name:'Кристаллическая нога', type:'Cyberlimb', surg:'CR', desc:'50/60 SDP, 3 слота, удар 2d6', cost:6000, hl:10, source:'Chr1', icon:'fa-person-walking'},
-  {cat:'cyberlimbs', name:'Гигантская рука', type:'Cyberlimb', surg:'CR', desc:'SDP 30/40, REF-2, удар 3d6, SP 20', cost:4000, hl:10, source:'Chr3', icon:'fa-hand-fist'},
-  {cat:'cyberlimbs', name:'Ноги "Корвет" базовые', type:'Cyberlimb', surg:'CR', desc:'+3 MA, бонус к проверкам движения', cost:4500, hl:15, source:'Chr4', icon:'fa-person-running'},
-  {cat:'cyberlimbs', name:'Ноги "Пуля"', type:'Cyberlimb', surg:'CRx2', desc:'MA 16, прыжок 10м', cost:4500, hl:20, source:'SOF', icon:'fa-person-running'},
-  {cat:'cyberlimbs', name:'Рука-щупальце', type:'Cyberlimb', surg:'CR', desc:'8 щупалец по 70 см, SDP 5 каждое', cost:4000, hl:25, source:'I2.2', icon:'fa-worm'},
-  {cat:'cyberlimbs', name:'Молот-кисть (HammerHand)', type:'Cyberhand', surg:'N', desc:'Кулак с гидропоршнем. Урон 1d10', cost:600, hl:10, source:'CP20', icon:'fa-hand-back-fist'},
-  {cat:'cyberlimbs', name:'Пила-кисть (BuzzHand)', type:'Cyberhand', surg:'N', desc:'Электрическая цепная пила. Урон 2d6+2', cost:600, hl:10, source:'CP20', icon:'fa-hand-back-fist'},
-  {cat:'cyberlimbs', name:'Кисть-захват', type:'Cyberhand', surg:'N', desc:'Реактивный гарпун, 30м троса', cost:350, hl:3, source:'CP20', icon:'fa-hand-back-fist'},
-  {cat:'cyberlimbs', name:'Электро-кулак (Lightning Fist)', type:'Cyberhand', surg:'N', desc:'Электричество: 2d6+1 урона', cost:900, hl:10, source:'RPI', icon:'fa-bolt'},
-  // BODY WEAPONS
-  {cat:'cyberweapons', name:'Скретчеры (Scratchers)', type:'Body Wpn', surg:'N', desc:'Руки. Урон 1d6/3', cost:100, hl:10, source:'CP20', icon:'fa-hand-dots'},
-  {cat:'cyberweapons', name:'Рипперы (Rippers)', type:'Body Wpn', surg:'M', desc:'Руки. Урон 1d6+3', cost:400, hl:15, source:'CP20', icon:'fa-hand-dots'},
-  {cat:'cyberweapons', name:'Волверы (Wolvers)', type:'Body Wpn', surg:'M', desc:'Руки. Урон 3d6', cost:600, hl:16, source:'CP20', icon:'fa-hand-dots'},
-  {cat:'cyberweapons', name:'Слайс-н-Дайс', type:'Body Wpn', surg:'M', desc:'Руки. Мононить, урон 2d6', cost:700, hl:15, source:'CP20', icon:'fa-hand-dots'},
-  {cat:'cyberweapons', name:'Киберзмея', type:'Body Wpn', surg:'MA', desc:'Самоуправляемое оружие. Урон 1d6', cost:1200, hl:20, source:'CP20', icon:'fa-worm'},
-  {cat:'cyberweapons', name:'Киберзмея Мк2', type:'Body Wpn', surg:'MA', desc:'Урон 2d6 при критическом попадании', cost:1600, hl:20, source:'CP20', icon:'fa-worm'},
-  {cat:'cyberweapons', name:'Костяной шип', type:'Body Wpn', surg:'MA', desc:'Выдвижной костяной шип. Урон 1d6+4', cost:1000, hl:10, source:'Chr3', icon:'fa-bone'},
-  {cat:'cyberweapons', name:'Огнемет Spitfire', type:'Body Wpn', surg:'MA', desc:'Мини-огнемет, 4 выстрела, 4м', cost:1000, hl:20, source:'ER', icon:'fa-fire'},
-  {cat:'cyberweapons', name:'Вживленные клыки', type:'Body Wpn', surg:'N', desc:'Урон 1d6/3', cost:200, hl:15, source:'CP20', icon:'fa-teeth'},
-  {cat:'cyberweapons', name:'Мандибулы', type:'Body Wpn', surg:'MA', desc:'Укус 2d6', cost:1200, hl:25, source:'I2.2', icon:'fa-teeth-open'},
-  {cat:'cyberweapons', name:'Киберчелюсть Тирекс', type:'Body Wpn', surg:'MA', desc:'Металлическая челюсть SP 6. Укус 3d6', cost:3000, hl:16, source:'P2', icon:'fa-teeth-open'},
-  // NANOTECH
-  {cat:'nanotech', name:'Плетение мышц и костей', type:'Nanotech', surg:'N', desc:'Повышает BODY на +2', cost:1500, hl:5, source:'CP20', icon:'fa-dna'},
-  {cat:'nanotech', name:'Кожное плетение (Skinweave)', type:'Nanotech', surg:'N', desc:'Бронирование всего тела SP 12', cost:2000, hl:10, source:'CP20', icon:'fa-shield'},
-  {cat:'nanotech', name:'Улучшенное кожное плетение SP 10', type:'Nanotech', surg:'N', desc:'SP 10. Без потери ATTR', cost:1600, hl:7, source:'Chr2', icon:'fa-shield'},
-  {cat:'nanotech', name:'Плетение-спасатель', type:'Nanotech', surg:'N', desc:'+1 к лечению в день', cost:4500, hl:7, source:'Chr1', icon:'fa-shield'},
-  {cat:'nanotech', name:'Хим-плетение', type:'Nanotech', surg:'N', desc:'+4 к хим-сейвам. SP 8 vs кислота', cost:2000, hl:7, source:'DS', icon:'fa-shield'},
-  {cat:'nanotech', name:'Термо-плетение', type:'Nanotech', surg:'N', desc:'Сопротивление жаре до 107°F', cost:1500, hl:7, source:'DS', icon:'fa-shield'},
-  {cat:'nanotech', name:'Вак-плетение', type:'Nanotech', surg:'MA', desc:'Защита от декомпрессии', cost:5000, hl:5, source:'DS', icon:'fa-shield'},
-  {cat:'nanotech', name:'Плетение "Акула" полное', type:'Nanotech', surg:'N', desc:'SP 12 по всему телу. Урон 1d6/3', cost:12000, hl:15, source:'SA', icon:'fa-shield'},
-  {cat:'nanotech', name:'Нанохирурги', type:'Nanotech', surg:'N', desc:'Удваивают естественную скорость лечения', cost:6000, hl:5, source:'CP20', icon:'fa-user-doctor'},
-  {cat:'nanotech', name:'Нанотех против чумы', type:'Nanotech', surg:'N', desc:'+3 против болезней и био-оружия', cost:1750, hl:0.5, source:'Chr1', icon:'fa-shield-virus'},
-  {cat:'nanotech', name:'Бронеплетение', type:'Nanotech', surg:'N', desc:'+1 BODY, SP 18, -1 REF', cost:4000, hl:5, source:'Chr2', icon:'fa-shield'},
-  // BIOWARE
-  {cat:'bioware', name:'Пересаженные мышцы', type:'Bioware', surg:'MA', desc:'BODY +1. Макс +2', cost:1000, hl:10, source:'CP20', icon:'fa-dumbbell'},
-  {cat:'bioware', name:'Улучшенные антитела', type:'Bioware', surg:'N', desc:'Лечение +1 пункт в день', cost:3000, hl:5, source:'CP20', icon:'fa-shield-virus'},
-  {cat:'bioware', name:'Связыватели токсинов', type:'Bioware', surg:'N', desc:'+4 к сейвам против ядов/наркотиков', cost:3000, hl:5, source:'CP20', icon:'fa-shield-virus'},
-  {cat:'bioware', name:'Скелетное усиление "Альфа"', type:'Bioware', surg:'M', desc:'BODY +1 для веса и BTM', cost:1300, hl:5, source:'Chr4', icon:'fa-bone'},
-  {cat:'bioware', name:'Нейронный мост', type:'Bioware', surg:'MA', desc:'Амбидекстрия', cost:600, hl:7, source:'Chr4', icon:'fa-brain'},
-  {cat:'bioware', name:'Ядовитые железы (зубы)', type:'Bioware', surg:'MA', desc:'Клыки, впрыскивающие яд', cost:500, hl:15, source:'Chr4', icon:'fa-teeth'},
-  {cat:'bioware', name:'Феромоны "Любовь"', type:'Bioware', surg:'M', desc:'+1 к Seduction', cost:1000, hl:5, source:'Chr4', icon:'fa-heart'},
-  {cat:'bioware', name:'Феромоны "Доверчивость"', type:'Bioware', surg:'M', desc:'+1 к Persuasion', cost:2000, hl:5, source:'Chr4', icon:'fa-handshake'},
-  {cat:'bioware', name:'Узел свертываемости', type:'Bioware', surg:'MA', desc:'Раны считаются на 1 уровень слабее', cost:3000, hl:5, source:'Chr4', icon:'fa-droplet'},
-  {cat:'bioware', name:'Бустер полного спектра', type:'Bioware', surg:'N', desc:'+4 vs болезни/яды/наркотики', cost:7500, hl:3, source:'NEO', icon:'fa-shield-virus'},
-  // IMPLANTS
-  {cat:'implants', name:'Назальные фильтры', type:'Implant', surg:'M', desc:'Очистка воздуха (70%)', cost:60, hl:2, source:'CP20', icon:'fa-wind'},
-  {cat:'implants', name:'Жабры для пресной воды', type:'Implant', surg:'MA', desc:'Дыхание под водой до 4 часов', cost:400, hl:15, source:'CP20', icon:'fa-fish'},
-  {cat:'implants', name:'Секс-имплант Mr Studd', type:'Implant', surg:'MA', desc:'+1 к Seduction', cost:300, hl:10, source:'CP20', icon:'fa-heart'},
-  {cat:'implants', name:'Подкожный карман', type:'Implant', surg:'M', desc:'Карман 2"x4" с молнией', cost:200, hl:10, source:'CP20', icon:'fa-briefcase'},
-  {cat:'implants', name:'Адреналиновый бустер', type:'Implant', surg:'M', desc:'+1 к REF на 1d6+2 хода', cost:400, hl:10, source:'CP20', icon:'fa-bolt'},
-  {cat:'implants', name:'Подкожная броня SP 18', type:'Implant', surg:'CR', desc:'Бронирование торса SP 18', cost:1200, hl:10, source:'CP20', icon:'fa-shield'},
-  {cat:'implants', name:'Детектор движения', type:'Implant', surg:'M', desc:'Зона 20 кв.м. Эффективность 70%', cost:200, hl:10, source:'CP20', icon:'fa-radar'},
-  {cat:'implants', name:'Киберпечень T-Maxx', type:'Implant', surg:'MA', desc:'+4 против проглоченных ядов', cost:450, hl:5, source:'Chr1', icon:'fa-flask'},
-  {cat:'implants', name:'Децентрализованное сердце', type:'Implant', surg:'CR', desc:'+2 к Death Saves при ранениях торса', cost:1300, hl:7, source:'Chr1', icon:'fa-heart-pulse'},
-  {cat:'implants', name:'Эндо-каркас Базовый', type:'Implant', surg:'SCR', desc:'BOD +3, +1 урон в ББ, SP 10', cost:12000, hl:13, source:'Chr3', icon:'fa-person'},
-  {cat:'implants', name:'Эндо-каркас Орбитальный', type:'Implant', surg:'SCR', desc:'BOD +3, +2 урон, SP 12', cost:25000, hl:15, source:'Chr3', icon:'fa-person'},
-  // FULL BORGS
-  {cat:'fullborgs', name:'Класс Альфа', type:'Full Borg', surg:'CRx2', desc:'REF 10, MA 10, BOD 12, SP 25', cost:40000, hl:60, source:'Chr2', icon:'fa-robot'},
-  {cat:'fullborgs', name:'Водолей (подводный)', type:'Full Borg', surg:'CRx2', desc:'REF 10, MA 10, BOD 15, SP 25', cost:50000, hl:70, source:'Chr2', icon:'fa-robot'},
-  {cat:'fullborgs', name:'Коперник (космический)', type:'Full Borg', surg:'CRx2', desc:'REF 11, MA 10, BOD 12, SP 25', cost:60000, hl:75, source:'Chr2', icon:'fa-robot'},
-  {cat:'fullborgs', name:'Эклипс (скрытные операции)', type:'Full Borg', surg:'CRx2', desc:'REF 13, MA 13, BOD 12, SP 25', cost:65000, hl:85, source:'Chr2', icon:'fa-robot'},
-  {cat:'fullborgs', name:'Энфорсер (безопасность)', type:'Full Borg', surg:'CRx2', desc:'REF 12, MA 15, BOD 12, SP 30', cost:55000, hl:85, source:'Chr2', icon:'fa-robot'},
-  {cat:'fullborgs', name:'Драгун (военный)', type:'Full Borg', surg:'CRx2', desc:'REF 15, MA 25, BOD 20, SP 40', cost:120000, hl:170, source:'Chr2', icon:'fa-robot'},
-  {cat:'fullborgs', name:'Самсон (индустриальный)', type:'Full Borg', surg:'CRx2', desc:'REF 10, MA 10, BOD 18, SP 25', cost:50000, hl:80, source:'Chr2', icon:'fa-robot'},
-  // LIGHT PISTOLS
-  {cat:'pistol-light', name:'Budget Arms C-13', type:'Light Pistol', wa:-1, con:'P', avail:'E', damage:'1d6', ammo:'5mm', shots:8, rof:2, rel:'ST', range:50, cost:75, source:'CP20', icon:'fa-gun'},
-  {cat:'pistol-light', name:'Astra Style-6', type:'Light Pistol', wa:-1, con:'P', avail:'E', damage:'1d6', ammo:'5mm', shots:6, rof:2, rel:'UR', range:50, cost:75, source:'ES', icon:'fa-gun'},
-  {cat:'pistol-light', name:'Federated Arms Impact', type:'Light Pistol', wa:1, con:'J', avail:'E', damage:'1d6', ammo:'.22', shots:10, rof:2, rel:'VR', range:50, cost:60, source:'SOF', icon:'fa-gun'},
-  {cat:'pistol-light', name:'Federated Arms .22', type:'Light Pistol', wa:0, con:'J', avail:'E', damage:'1d6', ammo:'.22', shots:10, rof:2, rel:'ST', range:50, cost:40, source:'SOF', icon:'fa-gun'},
-  {cat:'pistol-light', name:'Ruger MKII Standard', type:'Light Pistol', wa:2, con:'J', avail:'C', damage:'1d6', ammo:'.22', shots:13, rof:2, rel:'ST', range:50, cost:25, source:'CP13', icon:'fa-gun'},
-  {cat:'pistol-light', name:'Tokarev 1933 TT-33', type:'Light Pistol', wa:1, con:'J', avail:'C', damage:'1d6+1', ammo:'7.65', shots:8, rof:2, rel:'VR', range:50, cost:50, source:'CP13', icon:'fa-gun'},
-  {cat:'pistol-light', name:'Mauser M 1896', type:'Light Pistol', wa:2, con:'J', avail:'E', damage:'1d6+1', ammo:'7.65', shots:10, rof:2, rel:'ST', range:50, cost:50, source:'CP13', icon:'fa-gun'},
-  {cat:'pistol-light', name:'Dai Lung Cybermag 15', type:'Light Pistol', wa:-1, con:'P', avail:'C', damage:'1d6+1', ammo:'6mm', shots:10, rof:2, rel:'UR', range:50, cost:50, source:'CP20', icon:'fa-gun'},
-  {cat:'pistol-light', name:'Federated Arms X-22', type:'Light Pistol', wa:0, con:'J', avail:'E', damage:'1d6+1', ammo:'6mm', shots:10, rof:2, rel:'ST', range:50, cost:100, source:'CP20', icon:'fa-gun'},
-  {cat:'pistol-light', name:'Towa 12 Police Pistol', type:'Light Pistol', wa:3, con:'J', avail:'P', damage:'1d6+1', ammo:'6mm', shots:8, rof:2, rel:'VR', range:50, cost:450, source:'PAC', icon:'fa-gun'},
-  {cat:'pistol-light', name:'H&K P-11', type:'Light Pistol', wa:0, con:'J', avail:'P', damage:'4d6+1', ammo:'6mm R', shots:5, rof:1, rel:'VR', range:50, cost:700, source:'ES', icon:'fa-gun'},
-  {cat:'pistol-light', name:'Colt .38 "Detective"', type:'Light Pistol', wa:1, con:'J', avail:'C', damage:'1d6+2', ammo:'.38', shots:6, rof:1, rel:'VR', range:50, cost:50, source:'CP20', icon:'fa-gun'},
-  {cat:'pistol-light', name:'Federated Arms X-38', type:'Light Pistol', wa:1, con:'J', avail:'E', damage:'2d6', ammo:'.38', shots:10, rof:2, rel:'ST', range:50, cost:35, source:'SOF', icon:'fa-gun'},
-  // MEDIUM PISTOLS
-  {cat:'pistol-medium', name:'Medium Autopistol', type:'Medium Pistol', wa:0, con:'J', avail:'C', damage:'2d6+1', ammo:'9mm', shots:10, rof:2, rel:'ST', range:50, cost:300, source:'CGen', icon:'fa-gun'},
-  {cat:'pistol-medium', name:'Militech Arms Avenger', type:'Medium Pistol', wa:0, con:'J', avail:'E', damage:'2d6+1', ammo:'9mm', shots:10, rof:2, rel:'VR', range:50, cost:250, source:'CP20', icon:'fa-gun'},
-  {cat:'pistol-medium', name:'Federated Arms X-9', type:'Medium Pistol', wa:0, con:'J', avail:'E', damage:'2d6+1', ammo:'9mm', shots:12, rof:2, rel:'ST', range:50, cost:300, source:'CP20', icon:'fa-gun'},
-  {cat:'pistol-medium', name:'Goncz-Taurus Pistol', type:'Medium Pistol', wa:0, con:'J', avail:'E', damage:'2d6+1', ammo:'9mm', shots:15, rof:2, rel:'ST', range:50, cost:200, source:'Chr1', icon:'fa-gun'},
-  {cat:'pistol-medium', name:'Beretta M97P', type:'Medium Pistol', wa:2, con:'J', avail:'P', damage:'2d6+1', ammo:'9mm', shots:18, rof:2, rel:'VR', range:50, cost:480, source:'ES', icon:'fa-gun'},
-  {cat:'pistol-medium', name:'Towa 14 Pistol', type:'Medium Pistol', wa:2, con:'J', avail:'P', damage:'2d6+1', ammo:'9mm', shots:16, rof:3, rel:'VR', range:50, cost:520, source:'PAC', icon:'fa-gun'},
-  {cat:'pistol-medium', name:'FN High Power', type:'Medium Pistol', wa:1, con:'J', avail:'C', damage:'2d6+1', ammo:'9mm', shots:14, rof:2, rel:'VR', range:50, cost:150, source:'UK', icon:'fa-gun'},
-  {cat:'pistol-medium', name:'Glock 17', type:'Medium Pistol', wa:2, con:'J', avail:'C', damage:'2d6+1', ammo:'9mm', shots:17, rof:2, rel:'VR', range:50, cost:150, source:'CP13', icon:'fa-gun'},
-  {cat:'pistol-medium', name:'Walther PPK', type:'Medium Pistol', wa:1, con:'P', avail:'C', damage:'2d6+1', ammo:'9mm', shots:7, rof:2, rel:'ST', range:50, cost:100, source:'CP13', icon:'fa-gun'},
-  {cat:'pistol-medium', name:'Sig Sauer P-210-2', type:'Medium Pistol', wa:2, con:'J', avail:'P', damage:'2d6+1', ammo:'9mm', shots:8, rof:2, rel:'VR', range:50, cost:150, source:'CP13', icon:'fa-gun'},
-  {cat:'pistol-medium', name:'Colt Alpha-Omega .45', type:'Medium Pistol', wa:2, con:'J', avail:'C', damage:'2d6+2', ammo:'.45', shots:10, rof:2, rel:'VR', range:50, cost:500, source:'Chr1', icon:'fa-gun'},
-  {cat:'pistol-medium', name:'Dai Lung Streetmaster', type:'Medium Pistol', wa:0, con:'J', avail:'E', damage:'2d6+3', ammo:'10mm', shots:12, rof:2, rel:'UR', range:50, cost:250, source:'CP20', icon:'fa-gun'},
-  {cat:'pistol-medium', name:'Colt Alpha-Omega 10', type:'Medium Pistol', wa:2, con:'J', avail:'C', damage:'2d6+3', ammo:'10mm', shots:10, rof:2, rel:'VR', range:50, cost:500, source:'Chr1', icon:'fa-gun'},
-  {cat:'pistol-medium', name:'Arasaka WSA', type:'Medium Pistol', wa:0, con:'J', avail:'C', damage:'2d6+3', ammo:'10mm', shots:15, rof:2, rel:'VR', range:50, cost:400, source:'CB1', icon:'fa-gun'},
-  {cat:'pistol-medium', name:'Towa 13 Police Pistol', type:'Medium Pistol', wa:2, con:'J', avail:'P', damage:'2d6+3', ammo:'10mm', shots:12, rof:2, rel:'VR', range:50, cost:500, source:'PAC', icon:'fa-gun'},
-  {cat:'pistol-medium', name:'Desert Eagle', type:'Medium Pistol', wa:1, con:'J', avail:'C', damage:'2d6+3', ammo:'.357', shots:9, rof:2, rel:'VR', range:50, cost:250, source:'CP13', icon:'fa-gun'},
-  {cat:'pistol-medium', name:'S&W Combat Magnum', type:'Medium Pistol', wa:1, con:'J', avail:'C', damage:'2d6+3', ammo:'.357', shots:6, rof:2, rel:'VR', range:50, cost:150, source:'CP20', icon:'fa-gun'},
-  {cat:'pistol-medium', name:'Tsunami Express', type:'Medium Pistol', wa:3, con:'L', avail:'P', damage:'2d6+3', ammo:'5.2 ET', shots:24, rof:3, rel:'VR', range:75, cost:5300, source:'SOF2', icon:'fa-gun'},
-  {cat:'pistol-medium', name:'Militech Black Widow', type:'Medium Pistol', wa:1, con:'J', avail:'P', damage:'1/2d6', ammo:'Flec', shots:10, rof:2, rel:'ST', range:30, cost:400, source:'DS', icon:'fa-gun'},
-  // HEAVY PISTOLS
-  {cat:'pistol-heavy', name:'Heavy Autopistol', type:'Heavy Pistol', wa:-1, con:'J', avail:'E', damage:'3d6', ammo:'11mm', shots:10, rof:2, rel:'VR', range:50, cost:500, source:'CGen', icon:'fa-gun'},
-  {cat:'pistol-heavy', name:'Sternmeyer Type 35', type:'Heavy Pistol', wa:0, con:'J', avail:'C', damage:'3d6', ammo:'11mm', shots:8, rof:2, rel:'VR', range:50, cost:400, source:'CP20', icon:'fa-gun'},
-  {cat:'pistol-heavy', name:'Mustang Arms Mark II', type:'Heavy Pistol', wa:1, con:'L', avail:'C', damage:'3d6', ammo:'11mm', shots:20, rof:3, rel:'VR', range:50, cost:425, source:'SOF2', icon:'fa-gun'},
-  {cat:'pistol-heavy', name:'Nova 757 Cityhunter', type:'Heavy Pistol', wa:2, con:'J', avail:'P', damage:'3d6', ammo:'11mm', shots:18, rof:2, rel:'ST', range:50, cost:480, source:'BH', icon:'fa-gun'},
-  {cat:'pistol-heavy', name:'Baretta M20-F', type:'Heavy Pistol', wa:1, con:'J', avail:'C', damage:'3d6+3', ammo:'-', shots:15, rof:3, rel:'VR', range:50, cost:750, source:'P1', icon:'fa-gun'},
-  {cat:'pistol-heavy', name:'Tsunami Raimei Ramjet', type:'Heavy Pistol', wa:2, con:'L', avail:'P', damage:'5d6-7d6+1', ammo:'RJ', shots:6, rof:2, rel:'VR', range:100, cost:1100, source:'SOF2', icon:'fa-gun'},
-  {cat:'pistol-heavy', name:'Malorian Hvy Flechette', type:'Heavy Pistol', wa:1, con:'J', avail:'C', damage:'1d6+1', ammo:'4mm', shots:25, rof:2, rel:'ST', range:50, cost:595, source:'Chr1', icon:'fa-gun'},
-  {cat:'pistol-heavy', name:'Espinoza One Shot', type:'Heavy Pistol', wa:-1, con:'J', avail:'E', damage:'3d6', ammo:'.50', shots:1, rof:1, rel:'UR', range:50, cost:75, source:'SOF', icon:'fa-gun'},
-  {cat:'pistol-heavy', name:'.44 Mag Revolver', type:'Very Heavy Pistol', wa:0, con:'J', avail:'P', damage:'4d6', ammo:'.44', shots:6, rof:1, rel:'VR', range:50, cost:375, source:'NEO', icon:'fa-gun'},
-  {cat:'pistol-heavy', name:'Very Heavy Autopistol', type:'Very Heavy Pistol', wa:0, con:'J', avail:'E', damage:'4d6+1', ammo:'12mm', shots:8, rof:1, rel:'VR', range:50, cost:800, source:'CGen', icon:'fa-gun'},
-  {cat:'pistol-heavy', name:'Armalite 44', type:'Very Heavy Pistol', wa:0, con:'J', avail:'E', damage:'4d6+1', ammo:'12mm', shots:8, rof:1, rel:'ST', range:50, cost:450, source:'CP20', icon:'fa-gun'},
-  {cat:'pistol-heavy', name:'Enfield Spitfire', type:'Very Heavy Pistol', wa:1, con:'J', avail:'P', damage:'4d6+1', ammo:'12mm', shots:12, rof:1, rel:'VR', range:50, cost:550, source:'UK', icon:'fa-gun'},
-  {cat:'pistol-heavy', name:'Nova Arms "Stallone"', type:'Very Heavy Pistol', wa:1, con:'J', avail:'P', damage:'4d6', ammo:'.357 ET', shots:6, rof:2, rel:'VR', range:60, cost:999, source:'SOF2', icon:'fa-gun'},
-  {cat:'pistol-heavy', name:'Nova Arms "Eastwood"', type:'Very Heavy Pistol', wa:1, con:'J', avail:'P', damage:'6d6', ammo:'.44 ET', shots:6, rof:2, rel:'VR', range:80, cost:1499, source:'SOF2', icon:'fa-gun'},
-  {cat:'pistol-heavy', name:'Malorian Arms 3516', type:'Very Heavy Pistol', wa:-1, con:'J', avail:'R', damage:'6d6', ammo:'14mm', shots:6, rof:1, rel:'VR', range:50, cost:4525, source:'Chr1', icon:'fa-gun'},
-  // SMGs
-  {cat:'smg', name:'Vz61 Skorpion', type:'SMG', wa:2, con:'J', avail:'P', damage:'1d6+1', ammo:'.25', shots:20, rof:25, rel:'VR', range:150, cost:200, source:'CP20', icon:'fa-gun'},
-  {cat:'smg', name:'Ingram MAC 11', type:'SMG', wa:-1, con:'J', avail:'C', damage:'1d6+2', ammo:'.380', shots:32, rof:35, rel:'UR', range:150, cost:250, source:'CP13', icon:'fa-gun'},
-  {cat:'smg', name:'Uzi Miniauto 9', type:'SMG', wa:1, con:'J', avail:'E', damage:'2d6+1', ammo:'9mm', shots:30, rof:35, rel:'VR', range:150, cost:475, source:'CP20', icon:'fa-gun'},
-  {cat:'smg', name:'H&K MPK-9', type:'SMG', wa:1, con:'J', avail:'C', damage:'2d6+1', ammo:'9mm', shots:35, rof:25, rel:'ST', range:200, cost:520, source:'CP20', icon:'fa-gun'},
-  {cat:'smg', name:'UZI SMG', type:'SMG', wa:2, con:'J', avail:'C', damage:'2d6+1', ammo:'9mm', shots:30, rof:20, rel:'VR', range:150, cost:250, source:'CP20', icon:'fa-gun'},
-  {cat:'smg', name:'H&K MP5/MP5K', type:'SMG', wa:1, con:'L', avail:'C', damage:'2d6+1', ammo:'9mm', shots:30, rof:20, rel:'ST', range:200, cost:300, source:'CP13', icon:'fa-gun'},
-  {cat:'smg', name:'Ingram MAC 10', type:'SMG', wa:-1, con:'J', avail:'C', damage:'2d6+2', ammo:'.45', shots:30, rof:5, rel:'UR', range:200, cost:250, source:'CP20', icon:'fa-gun'},
-  {cat:'smg', name:'Arasaka Minami 10', type:'SMG', wa:0, con:'J', avail:'E', damage:'2d6+3', ammo:'10mm', shots:40, rof:20, rel:'VR', range:200, cost:500, source:'CP20', icon:'fa-gun'},
-  {cat:'smg', name:'Militech Viper', type:'SMG', wa:0, con:'J', avail:'P', damage:'2d6+3', ammo:'10mm', shots:40, rof:30, rel:'VR', range:200, cost:600, source:'HoB', icon:'fa-gun'},
-  {cat:'smg', name:'H&K MP-2013', type:'SMG', wa:1, con:'J', avail:'C', damage:'2d6+3', ammo:'10mm', shots:35, rof:32, rel:'ST', range:200, cost:450, source:'CP20', icon:'fa-gun'},
-  {cat:'smg', name:'Thompson M1', type:'SMG', wa:2, con:'N', avail:'C', damage:'2d6+2', ammo:'.45', shots:30, rof:20, rel:'ST', range:200, cost:250, source:'CP20', icon:'fa-gun'},
-  {cat:'smg', name:'Sternmeyer SMG 21', type:'SMG', wa:-1, con:'L', avail:'E', damage:'3d6', ammo:'11mm', shots:30, rof:15, rel:'VR', range:200, cost:500, source:'CP20', icon:'fa-gun'},
-  {cat:'smg', name:'H&K MPK-11', type:'SMG', wa:0, con:'L', avail:'C', damage:'4d6+1', ammo:'12mm', shots:30, rof:20, rel:'ST', range:200, cost:700, source:'CP20', icon:'fa-gun'},
-  {cat:'smg', name:'Bushmaster', type:'SMG', wa:0, con:'L', avail:'R', damage:'5d6', ammo:'5.56', shots:30, rof:20, rel:'ST', range:200, cost:1000, source:'CP20', icon:'fa-gun'},
-  // SHOTGUNS
-  {cat:'shotgun', name:'Arasaka Rapid 12', type:'Shotgun', wa:-1, con:'N', avail:'C', damage:'4d6', ammo:'12ga', shots:20, rof:'2/10', rel:'ST', range:50, cost:900, source:'CP20', icon:'fa-gun'},
-  {cat:'shotgun', name:'Militech Bulldog', type:'Shotgun', wa:0, con:'L', avail:'P', damage:'4d6', ammo:'12ga', shots:21, rof:'3/10', rel:'ST', range:50, cost:1000, source:'CB2', icon:'fa-gun'},
-  {cat:'shotgun', name:'CAWS', type:'Shotgun', wa:0, con:'N', avail:'R', damage:'4d6', ammo:'12ga', shots:10, rof:10, rel:'ST', range:50, cost:500, source:'CP20', icon:'fa-gun'},
-  {cat:'shotgun', name:'H&K CAWS 11', type:'Shotgun', wa:1, con:'N', avail:'R', damage:'4d6', ammo:'12ga', shots:30, rof:10, rel:'ST', range:50, cost:800, source:'UK', icon:'fa-gun'},
-  {cat:'shotgun', name:'Ithaca Stakeout', type:'Shotgun', wa:-1, con:'L', avail:'C', damage:'4d6', ammo:'12ga', shots:8, rof:2, rel:'ST', range:50, cost:200, source:'CP13', icon:'fa-gun'},
-  {cat:'shotgun', name:'Atchison Assault', type:'Shotgun', wa:-1, con:'N', avail:'R', damage:'4d6', ammo:'12ga', shots:20, rof:10, rel:'ST', range:50, cost:500, source:'CP20', icon:'fa-gun'},
-  {cat:'shotgun', name:'Tsunami "Ragnarok"', type:'Shotgun', wa:0, con:'N', avail:'R', damage:'6d6', ammo:'12ga ET', shots:40, rof:'2/20', rel:'ST', range:70, cost:4500, source:'PAC', icon:'fa-gun'},
-  {cat:'shotgun', name:'Luigi Franchi King Buck', type:'Shotgun', wa:-1, con:'N', avail:'P', damage:'6d6', ammo:'10ga', shots:4, rof:'2/4', rel:'VR', range:50, cost:800, source:'Chr2', icon:'fa-gun'},
-  // ASSAULT RIFLES
-  {cat:'rifle', name:'AK-47 / AKM', type:'Assault Rifle', wa:0, con:'N', avail:'E', damage:'5d6', ammo:'7.62', shots:30, rof:20, rel:'VR', range:400, cost:300, source:'CP20', icon:'fa-gun'},
-  {cat:'rifle', name:'AKR-20 Medium Assault', type:'Assault Rifle', wa:0, con:'N', avail:'C', damage:'5d6', ammo:'5.45', shots:30, rof:30, rel:'ST', range:400, cost:500, source:'CP20', icon:'fa-gun'},
-  {cat:'rifle', name:'AK 74', type:'Assault Rifle', wa:0, con:'N', avail:'C', damage:'5d6', ammo:'5.45', shots:30, rof:20, rel:'VR', range:400, cost:300, source:'CP13', icon:'fa-gun'},
-  {cat:'rifle', name:'M-16A', type:'Assault Rifle', wa:2, con:'N', avail:'C', damage:'5d6', ammo:'5.56', shots:30, rof:25, rel:'UR', range:400, cost:300, source:'CP20', icon:'fa-gun'},
-  {cat:'rifle', name:'Steyr AUG', type:'Assault Rifle', wa:2, con:'L', avail:'P', damage:'5d6', ammo:'5.56', shots:30, rof:20, rel:'VR', range:400, cost:400, source:'CP20', icon:'fa-gun'},
-  {cat:'rifle', name:'SA-80', type:'Assault Rifle', wa:2, con:'N', avail:'P', damage:'5d6', ammo:'5.56', shots:30, rof:20, rel:'VR', range:400, cost:600, source:'ES', icon:'fa-gun'},
-  {cat:'rifle', name:'Militech Ronin Light', type:'Assault Rifle', wa:1, con:'N', avail:'C', damage:'5d6', ammo:'5.56', shots:35, rof:30, rel:'VR', range:400, cost:450, source:'CP20', icon:'fa-gun'},
-  {cat:'rifle', name:'Sternmeyer M-95A4', type:'Assault Rifle', wa:1, con:'N', avail:'R', damage:'5d6', ammo:'5.56', shots:90, rof:30, rel:'VR', range:400, cost:750, source:'CB1', icon:'fa-gun'},
-  {cat:'rifle', name:'FN-RAL Heavy Assault', type:'Assault Rifle', wa:-1, con:'N', avail:'C', damage:'6d6+2', ammo:'7.62', shots:30, rof:30, rel:'VR', range:400, cost:600, source:'CP20', icon:'fa-gun'},
-  {cat:'rifle', name:'Kalashnikov A-80', type:'Assault Rifle', wa:-1, con:'N', avail:'E', damage:'6d6+2', ammo:'7.62', shots:35, rof:25, rel:'ST', range:400, cost:550, source:'CP20', icon:'fa-gun'},
-  {cat:'rifle', name:'FN-FAL', type:'Assault Rifle', wa:0, con:'N', avail:'C', damage:'6d6+2', ammo:'7.62', shots:20, rof:20, rel:'VR', range:400, cost:450, source:'UK', icon:'fa-gun'},
-  {cat:'rifle', name:'Militech Mk V', type:'Assault Rifle', wa:1, con:'N', avail:'P', damage:'9d6', ammo:'6.5 ET', shots:20, rof:4, rel:'ST', range:600, cost:1500, source:'SW', icon:'fa-gun'},
-  {cat:'rifle', name:'Militech M-31a1 AICW', type:'Assault Rifle', wa:2, con:'N', avail:'R', damage:'4d6', ammo:'4.5mm', shots:150, rof:30, rel:'ST', range:400, cost:1695, source:'Chr1', icon:'fa-gun'},
-  // SNIPERS
-  {cat:'sniper', name:'Winchester M70', type:'Sniper Rifle', wa:3, con:'N', avail:'C', damage:'5d6+1', ammo:'30-06', shots:5, rof:1, rel:'VR', range:500, cost:250, source:'CP20', icon:'fa-crosshairs'},
-  {cat:'sniper', name:'Nomad 7.62 Bolt-Act.', type:'Sniper Rifle', wa:2, con:'N', avail:'C', damage:'6d6+2', ammo:'7.62', shots:6, rof:1, rel:'VR', range:400, cost:500, source:'NEO', icon:'fa-crosshairs'},
-  {cat:'sniper', name:'FR-F6', type:'Sniper Rifle', wa:3, con:'N', avail:'P', damage:'6d6+2', ammo:'7.62', shots:10, rof:2, rel:'ST', range:500, cost:1100, source:'ES', icon:'fa-crosshairs'},
-  {cat:'sniper', name:'WA 2001 Sniper Rifle', type:'Sniper Rifle', wa:3, con:'N', avail:'R', damage:'6d6+2', ammo:'7.62', shots:10, rof:1, rel:'VR', range:1000, cost:900, source:'UK', icon:'fa-crosshairs'},
-  {cat:'sniper', name:'Towa Type-00-Kai', type:'Sniper Rifle', wa:3, con:'N', avail:'R', damage:'9d6+3', ammo:'7.62 ET', shots:6, rof:1, rel:'VR', range:1200, cost:3000, source:'PAC', icon:'fa-crosshairs'},
-  {cat:'sniper', name:'Barrett-Arasaka 20mm HVY', type:'Sniper Rifle', wa:0, con:'N', avail:'R', damage:'4d10', ammo:'20mm', shots:10, rof:1, rel:'VR', range:450, cost:2000, source:'CP20', icon:'fa-crosshairs'},
-  {cat:'sniper', name:'Barrett M-90', type:'Sniper Rifle', wa:3, con:'N', avail:'R', damage:'6d10', ammo:'12.7', shots:10, rof:1, rel:'VR', range:1000, cost:1500, source:'HoB', icon:'fa-crosshairs'},
-  {cat:'sniper', name:'Arasaka WSSX', type:'Sniper Rifle', wa:3, con:'N', avail:'R', damage:'4d6x1d3', ammo:'20mm FF', shots:13, rof:1, rel:'VR', range:600, cost:3600, source:'SF', icon:'fa-crosshairs'},
-  {cat:'sniper', name:'Barrett-Arasaka WSSE', type:'Sniper Rifle', wa:1, con:'N', avail:'R', damage:'8d10+3', ammo:'.50 ET', shots:10, rof:1, rel:'VR', range:1000, cost:2500, source:'SW', icon:'fa-crosshairs'},
-  // HEAVY WEAPONS
-  {cat:'heavy', name:'FN MG-6 One-on-One', type:'Heavy Weapon', wa:1, con:'N', avail:'P', damage:'5d6', ammo:'5.56', shots:100, rof:40, rel:'VR', range:450, cost:1800, source:'ES', icon:'fa-gun'},
-  {cat:'heavy', name:'Militech M-232 SAW', type:'Heavy Weapon', wa:0, con:'N', avail:'P', damage:'5d6', ammo:'5.56', shots:100, rof:20, rel:'VR', range:400, cost:1000, source:'HoB', icon:'fa-gun'},
-  {cat:'heavy', name:'M-60D Machine Gun', type:'Heavy Weapon', wa:1, con:'N', avail:'P', damage:'6d6+2', ammo:'7.62', shots:100, rof:20, rel:'VR', range:500, cost:1000, source:'HoB', icon:'fa-gun'},
-  {cat:'heavy', name:'FN-MAG Machine gun', type:'Heavy Weapon', wa:0, con:'N', avail:'R', damage:'6d6+2', ammo:'7.62', shots:250, rof:30, rel:'VR', range:1000, cost:1500, source:'UK', icon:'fa-gun'},
-  {cat:'heavy', name:'M2A5HB Browning .50', type:'Heavy Weapon', wa:0, con:'N', avail:'P', damage:'6d10', ammo:'12.7', shots:100, rof:10, rel:'VR', range:600, cost:2000, source:'HoB', icon:'fa-gun'},
-  {cat:'heavy', name:'Militech 20L Autocan.', type:'Heavy Weapon', wa:0, con:'N', avail:'R', damage:'8d10', ammo:'20mm', shots:100, rof:10, rel:'VR', range:500, cost:3000, source:'HoB', icon:'fa-gun'},
-  {cat:'heavy', name:'Rhinemetall EMG-85', type:'Heavy Weapon', wa:3, con:'N', avail:'R', damage:'5d10+10 EAP', ammo:'-', shots:5, rof:2, rel:'ST', range:1500, cost:11370, source:'Chr2', icon:'fa-bolt'},
-  {cat:'heavy', name:'1cm Rail Cannon', type:'Heavy Weapon', wa:2, con:'N', avail:'R', damage:'10d10 EAP', ammo:'10mm', shots:50, rof:2, rel:'ST', range:1000, cost:750000, source:'MM', icon:'fa-bolt'},
-  {cat:'heavy', name:'Militech RPG-A', type:'Heavy Weapon', wa:-2, con:'N', avail:'R', damage:'6d10 HEAT', ammo:'-', shots:1, rof:1, rel:'VR', range:750, cost:1500, source:'MM', icon:'fa-bomb'},
-  {cat:'heavy', name:'LAW', type:'Heavy Weapon', wa:-2, con:'L', avail:'P', damage:'4d10 HEAT', ammo:'-', shots:1, rof:1, rel:'VR', range:200, cost:300, source:'MM', icon:'fa-bomb'},
-  {cat:'heavy', name:'Militech Hotshot LATGM', type:'Heavy Weapon', wa:2, con:'N', avail:'P', damage:'12d10 HEAT', ammo:'-', shots:1, rof:1, rel:'VR', range:1000, cost:2500, source:'MM', icon:'fa-bomb'},
-  {cat:'heavy', name:'Militech Anvil-2 HATGM', type:'Heavy Weapon', wa:2, con:'N', avail:'P', damage:'18d10 HEAT', ammo:'-', shots:1, rof:1, rel:'VR', range:3000, cost:10000, source:'MM', icon:'fa-bomb'},
-  // MELEE
-  {cat:'melee', name:'Нож (Knife)', type:'Melee', wa:0, con:'P', avail:'C', damage:'1d6', ammo:'-', shots:0, rof:0, rel:'-', range:1, cost:20, source:'CP20', icon:'fa-khanda'},
-  {cat:'melee', name:'Кастет (Brass Knuckles)', type:'Melee', wa:0, con:'P', avail:'C', damage:'1d6+2', ammo:'-', shots:0, rof:0, rel:'-', range:1, cost:10, source:'CP20', icon:'fa-hand-fist'},
-  {cat:'melee', name:'Боевой нож', type:'Melee', wa:1, con:'J', avail:'P', damage:'1d6+3', ammo:'-', shots:0, rof:0, rel:'-', range:1, cost:70, source:'PAC', icon:'fa-khanda'},
-  {cat:'melee', name:'Мачете', type:'Melee', wa:0, con:'L', avail:'C', damage:'1d6+3', ammo:'-', shots:0, rof:0, rel:'-', range:1, cost:60, source:'NEO', icon:'fa-khanda'},
-  {cat:'melee', name:'Меч (Sword)', type:'Melee', wa:0, con:'N', avail:'C', damage:'2d6+2', ammo:'-', shots:0, rof:0, rel:'-', range:1, cost:100, source:'CP20', icon:'fa-khanda'},
-  {cat:'melee', name:'Дубинка Excalibur', type:'Melee', wa:0, con:'J', avail:'P', damage:'2d6+3', ammo:'-', shots:0, rof:0, rel:'-', range:1, cost:80, source:'P&S', icon:'fa-khanda'},
-  {cat:'melee', name:'Нунчаку', type:'Melee', wa:0, con:'L', avail:'C', damage:'3d6', ammo:'-', shots:0, rof:0, rel:'-', range:1, cost:15, source:'CP20', icon:'fa-khanda'},
-  {cat:'melee', name:'Тонфа', type:'Melee', wa:0, con:'L', avail:'C', damage:'3d6', ammo:'-', shots:0, rof:0, rel:'-', range:1, cost:15, source:'PAC', icon:'fa-khanda'},
-  {cat:'melee', name:'Нагината', type:'Melee', wa:0, con:'N', avail:'P', damage:'3d6', ammo:'-', shots:0, rof:0, rel:'-', range:2, cost:100, source:'CP20', icon:'fa-khanda'},
-  {cat:'melee', name:'Катана Arasaka', type:'Melee', wa:2, con:'N', avail:'R', damage:'3d6', ammo:'-', shots:0, rof:0, rel:'-', range:1, cost:0, source:'SW', icon:'fa-khanda'},
-  {cat:'melee', name:'Монокатана Kendachi', type:'Melee', wa:1, con:'N', avail:'R', damage:'4d6', ammo:'-', shots:0, rof:0, rel:'-', range:1, cost:600, source:'CP20', icon:'fa-khanda'},
-  {cat:'melee', name:'Мононагината Kendachi', type:'Melee', wa:0, con:'N', avail:'R', damage:'4d6', ammo:'-', shots:0, rof:0, rel:'-', range:2, cost:400, source:'CP20', icon:'fa-khanda'},
-  {cat:'melee', name:'Силовой меч Kendachi', type:'Melee', wa:0, con:'L', avail:'R', damage:'4d6', ammo:'-', shots:0, rof:0, rel:'-', range:1, cost:860, source:'Chr1', icon:'fa-khanda'},
-  {cat:'melee', name:'Титановая катана', type:'Melee', wa:1, con:'L', avail:'R', damage:'3d6+2', ammo:'-', shots:0, rof:0, rel:'-', range:1, cost:2850, source:'P1', icon:'fa-khanda'},
-  {cat:'melee', name:'Кувалда', type:'Melee', wa:-1, con:'N', avail:'C', damage:'4d6', ammo:'-', shots:0, rof:0, rel:'-', range:1, cost:20, source:'CP20', icon:'fa-khanda'},
-  {cat:'melee', name:'Бензопила', type:'Melee', wa:-3, con:'N', avail:'C', damage:'4d6', ammo:'-', shots:0, rof:0, rel:'-', range:2, cost:80, source:'CP20', icon:'fa-khanda'},
-  {cat:'melee', name:'Мононить', type:'Melee', wa:0, con:'P', avail:'R', damage:'3d6', ammo:'-', shots:0, rof:0, rel:'-', range:1, cost:60, source:'Chr2', icon:'fa-khanda'},
-  // CLOTHING
-  {cat:'clothing', name:'Бронекуртка (SP 14)', type:'Armor', surg:'-', desc:'Защита торса SP 14', cost:200, hl:0, source:'CP20', icon:'fa-vest'},
-  {cat:'clothing', name:'Бронеплащ (SP 18)', type:'Armor', surg:'-', desc:'Защита торса SP 18', cost:300, hl:0, source:'CP20', icon:'fa-vest'},
-  {cat:'clothing', name:'Бронированные чулки (SP 6)', type:'Armor', surg:'-', desc:'Защита ног SP 6', cost:110, hl:0, source:'CP20', icon:'fa-socks'},
-  {cat:'clothing', name:'Бронежилет Uniware (SP 10)', type:'Armor', surg:'-', desc:'Защита торса SP 10', cost:60, hl:0, source:'CP20', icon:'fa-vest'},
-  {cat:'clothing', name:'Плащ Дастер (SP 18)', type:'Armor', surg:'-', desc:'SP 18, +1 W&S', cost:845, hl:0, source:'CP20', icon:'fa-vest'},
-  {cat:'clothing', name:'Бронепальто Takanaka (SP 16)', type:'Armor', surg:'-', desc:'SP 16, деловой стиль', cost:2000, hl:0, source:'CP20', icon:'fa-vest-patches'},
-  {cat:'clothing', name:'Боевой зимний костюм Sternmeyer', type:'Armor', surg:'-', desc:'EV -1, защита от холода', cost:575, hl:0, source:'CP20', icon:'fa-mitten'},
-  {cat:'clothing', name:'Огнеупорный костюм Fiorelli', type:'Armor', surg:'-', desc:'Защита от огня', cost:1500, hl:0, source:'CP20', icon:'fa-fire'},
-  {cat:'clothing', name:'Медицинская броня (SP 20)', type:'Armor', surg:'-', desc:'SP 20, +2 Med, EV -3', cost:3400, hl:0, source:'CP20', icon:'fa-user-doctor'},
-  {cat:'clothing', name:'Шлем "Guercio" (SP 20)', type:'Armor', surg:'-', desc:'Защита головы SP 20', cost:600, hl:0, source:'CP20', icon:'fa-hard-hat'},
-  {cat:'clothing', name:'Баллистический шлем (SP 14)', type:'Armor', surg:'-', desc:'Защита головы SP 14', cost:350, hl:0, source:'CP20', icon:'fa-hard-hat'},
-  // GEAR
-  {cat:'gear', name:'Полевой набор подрывника', type:'Gear', surg:'-', desc:'30кг снаряжения', cost:1500, hl:0, source:'CP20', icon:'fa-bomb'},
-  {cat:'gear', name:'Противогаз', type:'Gear', surg:'-', desc:'Фильтры 10eb', cost:200, hl:0, source:'CP20', icon:'fa-mask-ventilator'},
-  {cat:'gear', name:'IR Combat Cloak', type:'Gear', surg:'-', desc:'-5 Notice, ИК-маскировка', cost:450, hl:0, source:'CP20', icon:'fa-user-ninja'},
-  {cat:'gear', name:'Dynlar Smartgrapple', type:'Gear', surg:'-', desc:'100м трос с лебедкой', cost:1500, hl:0, source:'CP20', icon:'fa-link'},
-  {cat:'gear', name:'Трос с кошкой', type:'Gear', surg:'-', desc:'100м', cost:60, hl:0, source:'CP20', icon:'fa-link'},
-  {cat:'gear', name:'Палатка на 2 персоны', type:'Gear', surg:'-', desc:'Базовое укрытие', cost:150, hl:0, source:'CP20', icon:'fa-campground'},
-  {cat:'gear', name:'Biotechnica Enviro Analyzer', type:'Gear', surg:'-', desc:'Анализатор среды', cost:70, hl:0, source:'CP20', icon:'fa-flask-vial'},
-  {cat:'gear', name:'Плазменный резак', type:'Gear', surg:'-', desc:'Резка металла', cost:250, hl:0, source:'CP20', icon:'fa-fire-flame-curved'},
-  {cat:'gear', name:'Миноискатель', type:'Gear', surg:'-', desc:'Обнаружение мин', cost:100, hl:0, source:'CP20', icon:'fa-magnifying-glass'},
-  {cat:'gear', name:'Базовый набор инструментов', type:'Gear', surg:'-', desc:'1кг, базовый ремонт', cost:500, hl:0, source:'CP20', icon:'fa-toolbox'},
-  {cat:'gear', name:'Techscanner', type:'Gear', surg:'-', desc:'Диагностика систем', cost:600, hl:0, source:'CP20', icon:'fa-stethoscope'},
-  // ELECTRONICS
-  {cat:'electronics', name:'Data Cache (100MU)', type:'Electronics', surg:'-', desc:'SDP 15, SP 30', cost:8000, hl:0, source:'CP20', icon:'fa-server'},
-  {cat:'electronics', name:'Zetatech E-Book', type:'Electronics', surg:'-', desc:'5 часов работы, 12MU', cost:100, hl:0, source:'CP20', icon:'fa-book'},
-  {cat:'electronics', name:'Microtech "PCZ Super"', type:'Electronics', surg:'-', desc:'INT 2, 30MU, 150мин', cost:1500, hl:0, source:'CP20', icon:'fa-laptop'},
-  {cat:'electronics', name:'Wyzard "Handbox"', type:'Electronics', surg:'-', desc:'INT 1, голоэкран', cost:6700, hl:0, source:'CP20', icon:'fa-laptop'},
-  {cat:'electronics', name:'Braindance Recording Unit', type:'Electronics', surg:'-', desc:'Запись брейнданса', cost:12000, hl:0, source:'CP20', icon:'fa-vr-cardboard'},
-  {cat:'electronics', name:'Braindance Editing Unit', type:'Electronics', surg:'-', desc:'Монтаж брейнданса', cost:26000, hl:0, source:'CP20', icon:'fa-vr-cardboard'},
-  {cat:'electronics', name:'Мультимедиа новостная камера', type:'Electronics', surg:'-', desc:'Профессиональная съёмка', cost:2600, hl:0, source:'CP20', icon:'fa-video'},
-  {cat:'electronics', name:'Ghost Projector', type:'Electronics', surg:'-', desc:'Голографический проектор', cost:1500, hl:0, source:'CP20', icon:'fa-ghost'},
-  {cat:'electronics', name:'Smartgoggle Mirrorshades', type:'Electronics', surg:'-', desc:'2 опции', cost:450, hl:0, source:'CP20', icon:'fa-glasses'},
-  {cat:'electronics', name:'Net-Vision Glasses', type:'Electronics', surg:'-', desc:'Очки сетевого зрения', cost:900, hl:0, source:'CP20', icon:'fa-glasses'},
-  {cat:'electronics', name:'Портативный радар', type:'Electronics', surg:'-', desc:'Обнаружение целей', cost:250, hl:0, source:'CP20', icon:'fa-radar'},
+<script type="module">
+// ============ IMPORT DATABASE ============
+import { DB } from './db.js';
+
+// ============ GITHUB AUTH STATE ============
+let githubUser = null;
+let hasEditPermission = false;
+const REPO_OWNER = 'DARKNEET69';
+const REPO_NAME = 'DATATERM';
+const REPO_PATH = 'main';
 ];
+
+// ============ GITHUB AUTH FUNCTIONS ============
+async function checkGithubPermissions(token) {
+  try {
+    const userResponse = await fetch('https://api.github.com/user', {
+      headers: { 'Authorization': `token ${token}` }
+    });
+    if (!userResponse.ok) return false;
+    githubUser = await userResponse.json();
+    
+    const permResponse = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/permission`, {
+      headers: { 'Authorization': `token ${token}` }
+    });
+    if (permResponse.ok) {
+      const perm = await permResponse.json();
+      hasEditPermission = perm.push === true;
+    }
+    return true;
+  } catch (e) {
+    console.error('GitHub auth error:', e);
+    return false;
+  }
+}
+
+function logoutGithub() {
+  githubUser = null;
+  hasEditPermission = false;
+  localStorage.removeItem('github_token');
+  updateAuthUI();
+  renderAll();
+}
+
+async function handleGithubLogin() {
+  const token = localStorage.getItem('github_token');
+  if (token) {
+    const success = await checkGithubPermissions(token);
+    if (success) {
+      updateAuthUI();
+      renderAll();
+      return;
+    }
+  }
+  const CLIENT_ID = 'Ov23liXXXXXXXXXXXX';
+  window.open(`https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}&scope=repo`, '_blank');
+  window.addEventListener('message', async (event) => {
+    if (event.data.type === 'github-auth' && event.data.token) {
+      localStorage.setItem('github_token', event.data.token);
+      await checkGithubPermissions(event.data.token);
+      updateAuthUI();
+      renderAll();
+    }
+  });
+}
+
+function updateAuthUI() {
+  const authContainer = document.getElementById('auth-container');
+  if (!authContainer) return;
+  
+  if (githubUser) {
+    authContainer.innerHTML = `
+      <div class=\"auth-info\" style=\"display:flex;align-items:center;gap:8px;\">
+        <img src=\"${githubUser.avatar_url}\" alt=\"${githubUser.login}\" style=\"width:28px;height:28px;border-radius:50%;\">
+        <span style=\"color:#fff;font-size:13px;\">${githubUser.login}</span>
+        ${hasEditPermission ? '<span style=\"color:var(--color-green);font-size:11px;\">[EDIT]</span>' : ''}
+        <button class=\"icon-btn\" onclick=\"logoutGithub()\" title=\"Logout\" style=\"width:32px;height:32px;font-size:12px;\"><i class=\"fas fa-sign-out-alt\"></i></button>
+      </div>
+    `;
+  } else {
+    authContainer.innerHTML = `<button class=\"icon-btn\" onclick=\"handleGithubLogin()\" title=\"Login with GitHub\"><i class=\"fab fa-github\"></i></button>`;
+  }
+}
+
+async function saveDBToGithub(content) {
+  if (!hasEditPermission || !githubUser) {
+    alert('No edit permission');
+    return false;
+  }
+  const token = localStorage.getItem('github_token');
+  try {
+    const blobResponse = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${DB_FILE_PATH}?ref=${REPO_PATH}`);
+    const blobData = await blobResponse.json();
+    const sha = blobData.sha;
+    
+    const encoder = new TextEncoder();
+    const encodedContent = btoa(String.fromCharCode(...encoder.encode(content)));
+    
+    const commitResponse = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${DB_FILE_PATH}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `token ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: 'Update DB via DATATERM UI',
+        content: encodedContent,
+        sha: sha
+      })
+    });
+    return commitResponse.ok;
+  } catch (e) {
+    console.error('Save error:', e);
+    return false;
+  }
+}
+
 
 // ============ CATEGORIES CONFIG ============
 const CATEGORIES = [
@@ -1704,8 +1532,17 @@ function renderAll() {
   renderSortMenu();
   renderColumnsMenu();
   renderContent();
+  updateAuthUI();
 }
-renderAll();
+
+// Check for existing GitHub session on load
+(async () => {
+  const token = localStorage.getItem('github_token');
+  if (token) {
+    await checkGithubPermissions(token);
+  }
+  renderAll();
+})();
 </script>
 </body>
 </html>
