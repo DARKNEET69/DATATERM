@@ -1,0 +1,1711 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DATATERM</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/roboto@5.0.8/index.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg-main: #121212;
+  --bg-content: #1d1d1d;
+  --bg-elev: #252525;
+  --bg-elev2: #2c2c2c;
+  --bg-hover: #262626;
+  --bg-row-hover: #1f1f1f;
+  --accent: #b90d0f;
+  --accent-hover: #de1012;
+  --accent-dim: rgba(185, 13, 15, 0.1);
+  --border: #3c4043;
+  --border-weak: rgba(232, 234, 237, 0.12);
+  --text-primary: #f1f3f4;
+  --text-secondary: #e8eaed;
+  --text-minor: #bdc1c6;
+  --color-green: #14da37;
+  --color-blue: #2c97f5;
+  --color-orange: #f19a2b;
+  --color-yellow: #e0ca18;
+  --color-purple: #a24bff;
+  --color-cyan: #19d0c0;
+  --color-red: #f12b2b;
+}
+html, body {
+  height: 100%;
+  font-family: 'Roboto', Arial, sans-serif;
+  font-size: 14px;
+  background: var(--bg-main);
+  color: var(--text-primary);
+  overflow: hidden;
+}
+.app { display: flex; height: 100vh; flex-direction: column; }
+
+/* Header */
+.header {
+  display: flex; align-items: center; height: 56px;
+  background: var(--accent); padding: 0 12px; gap: 8px;
+  flex-shrink: 0; z-index: 100;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+.menu-btn {
+  background: transparent; border: none; color: #fff;
+  font-size: 20px; cursor: pointer; padding: 8px;
+  border-radius: 50%; width: 40px; height: 40px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.menu-btn:hover { background: rgba(255,255,255,0.1); }
+.app-title {
+  color: #fff; font-size: 18px; font-weight: 500;
+  margin-right: 16px; letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+.search-box {
+  flex: 1; min-width: 0; max-width: 600px; display: flex; align-items: center;
+  background: rgba(255,255,255,0.25); border-radius: 8px;
+  padding: 0 12px; height: 40px; transition: background 0.3s;
+}
+.search-box:focus-within { background: rgba(255,255,255,0.35); }
+.search-box i { color: #fff; margin-right: 8px; font-size: 16px; flex-shrink: 0; }
+.search-box input {
+  flex: 1; min-width: 0; background: transparent; border: none; outline: none;
+  color: #fff; font-size: 14px; font-family: inherit;
+}
+.search-box input::placeholder { color: rgba(255,255,255,0.8); }
+.header-actions {
+  display: flex; align-items: center; gap: 4px; margin-left: auto; flex-shrink: 0;
+}
+.view-toggle {
+  display: flex; background: rgba(255,255,255,0.15);
+  border-radius: 6px; padding: 3px;
+}
+.view-toggle button {
+  background: transparent; border: none; color: rgba(255,255,255,0.7);
+  padding: 6px 10px; border-radius: 4px; cursor: pointer;
+  font-size: 13px; display: flex; align-items: center; gap: 6px;
+  font-family: inherit;
+}
+.view-toggle button.active {
+  background: rgba(255,255,255,0.25); color: #fff;
+}
+.icon-btn {
+  background: transparent; border: none; color: #fff;
+  width: 40px; height: 40px; border-radius: 50%;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 16px; flex-shrink: 0;
+}
+.icon-btn:hover { background: rgba(255,255,255,0.1); }
+
+/* Main */
+.main { display: flex; flex: 1; overflow: hidden; }
+
+/* Sidebar */
+.sidebar {
+  width: 240px; background: var(--bg-content);
+  border-right: 1px solid var(--border-weak);
+  overflow-y: auto; flex-shrink: 0;
+  transition: width 0.25s;
+}
+.sidebar.collapsed { width: 64px; }
+.sidebar.collapsed .nav-label,
+.sidebar.collapsed .nav-section-title,
+.sidebar.collapsed .nav-divider,
+.sidebar.collapsed .count { display: none; }
+.sidebar.collapsed .nav-item {
+  justify-content: center; padding: 12px 0;
+  margin: 2px 8px; border-radius: 8px;
+}
+.sidebar.collapsed .nav-item i { margin: 0; font-size: 18px; }
+.sidebar::-webkit-scrollbar { width: 8px; }
+.sidebar::-webkit-scrollbar-thumb { background: transparent; border-radius: 4px; }
+.sidebar:hover::-webkit-scrollbar-thumb { background: var(--text-minor); }
+.nav-section-title {
+  color: var(--text-minor); font-size: 11px;
+  text-transform: uppercase; padding: 16px 16px 8px;
+  letter-spacing: 0.5px; font-weight: 500;
+}
+.nav-item {
+  display: flex; align-items: center; padding: 10px 16px;
+  cursor: pointer; color: var(--text-secondary);
+  border-radius: 24px; margin: 2px 8px;
+  transition: background 0.15s; font-size: 13px;
+  gap: 12px; user-select: none; position: relative;
+}
+.nav-item:hover { background: var(--bg-hover); }
+.nav-item.active { background: var(--accent-dim); color: var(--accent); }
+.nav-item.active i { color: var(--accent); }
+.nav-item i { width: 20px; text-align: center; font-size: 14px; color: var(--text-minor); }
+.nav-item .count {
+  margin-left: auto; font-size: 11px;
+  background: var(--bg-elev2); padding: 2px 8px;
+  border-radius: 10px; color: var(--text-minor);
+}
+.nav-divider { height: 1px; background: var(--border-weak); margin: 8px 16px; }
+
+/* Content */
+.content { flex: 1; display: flex; overflow: hidden; background: var(--bg-main); }
+.table-pane { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+
+/* Subnav */
+.subnav {
+  background: var(--bg-content); padding: 12px 16px 8px;
+  border-bottom: 1px solid var(--border-weak); flex-shrink: 0;
+}
+.subnav-top {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 10px; gap: 12px;
+}
+.view-title {
+  font-size: 20px; font-weight: 500; color: var(--text-primary);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.view-actions { display: flex; gap: 4px; align-items: center; flex-shrink: 0; }
+
+/* Filters bar */
+.filters-bar {
+  display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+}
+.filter-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--bg-elev); border: 1px solid var(--border);
+  color: var(--text-secondary); padding: 5px 12px;
+  border-radius: 16px; font-size: 12px; cursor: pointer;
+  transition: all 0.15s; position: relative;
+}
+.filter-chip:hover { background: var(--bg-elev2); }
+.filter-chip.active {
+  background: var(--accent-dim); border-color: var(--accent); color: var(--accent);
+}
+.filter-chip select {
+  background: transparent; border: none; color: inherit;
+  font-size: 12px; font-family: inherit; outline: none;
+  cursor: pointer; padding-right: 4px;
+}
+.filter-chip select option { background: var(--bg-elev); color: var(--text-primary); }
+.results-count {
+  color: var(--text-minor); font-size: 12px; margin-left: auto;
+}
+
+/* Dropdown */
+.dropdown { position: relative; }
+.dropdown-menu {
+  position: absolute; top: 100%; right: 0; margin-top: 4px;
+  background: var(--bg-elev); border: 1px solid var(--border);
+  border-radius: 4px; min-width: 220px; max-height: 400px; overflow-y: auto;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4); z-index: 1000;
+  display: none; padding: 4px 0;
+}
+.dropdown.open .dropdown-menu { display: block; }
+.dropdown-item {
+  padding: 8px 14px; cursor: pointer; font-size: 13px;
+  color: var(--text-secondary); display: flex;
+  align-items: center; gap: 8px;
+}
+.dropdown-item:hover { background: var(--bg-hover); }
+.dropdown-item.active { color: var(--accent); }
+.dropdown-item.disabled { opacity: 0.4; cursor: not-allowed; }
+.dropdown-divider { height: 1px; background: var(--border-weak); margin: 4px 0; }
+
+/* Columns panel */
+.columns-panel {
+  min-width: 260px; padding: 8px 0;
+}
+.columns-panel .panel-header {
+  padding: 8px 14px 12px;
+  border-bottom: 1px solid var(--border-weak);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.columns-panel .panel-title {
+  font-size: 13px; font-weight: 500; color: var(--text-primary);
+}
+.columns-panel .panel-actions {
+  display: flex; gap: 8px;
+}
+.columns-panel .panel-link {
+  font-size: 11px; color: var(--accent); cursor: pointer;
+  background: none; border: none; font-family: inherit;
+}
+.columns-panel .panel-link:hover { text-decoration: underline; }
+.col-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 14px; cursor: pointer;
+  transition: background 0.1s;
+}
+.col-item:hover { background: var(--bg-hover); }
+.col-item.locked { opacity: 0.5; cursor: not-allowed; }
+.col-checkbox {
+  width: 16px; height: 16px; border: 2px solid var(--border);
+  border-radius: 3px; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: all 0.15s;
+}
+.col-item.checked .col-checkbox {
+  background: var(--accent); border-color: var(--accent);
+}
+.col-item.checked .col-checkbox::after {
+  content: '✓'; color: #fff; font-size: 12px; font-weight: bold;
+}
+.col-label { font-size: 13px; color: var(--text-secondary); flex: 1; }
+.col-item.locked .col-label { color: var(--text-minor); }
+
+/* Table */
+.table-wrap { flex: 1; overflow: auto; background: var(--bg-content); }
+.table-wrap::-webkit-scrollbar { width: 10px; height: 10px; }
+.table-wrap::-webkit-scrollbar-thumb { background: #555; border-radius: 5px; }
+table {
+  width: 100%; border-collapse: collapse;
+  font-size: 13px; min-width: 600px;
+}
+thead { position: sticky; top: 0; background: var(--bg-content); z-index: 5; }
+thead th {
+  text-align: left; padding: 10px 12px; font-weight: 500;
+  font-size: 11px; color: var(--text-minor);
+  text-transform: uppercase; letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--border-weak);
+  cursor: pointer; user-select: none; white-space: nowrap;
+}
+thead th:hover { color: var(--text-primary); }
+thead th .sort-indicator { margin-left: 4px; font-size: 10px; opacity: 0.5; }
+thead th.sorted .sort-indicator { opacity: 1; color: var(--accent); }
+tbody tr {
+  cursor: pointer; transition: background 0.1s;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+tbody tr:hover { background: var(--bg-row-hover); }
+tbody tr.selected { background: rgba(185, 13, 15, 0.15); }
+tbody td {
+  padding: 10px 12px; color: var(--text-primary);
+  white-space: nowrap; overflow: hidden;
+  text-overflow: ellipsis; max-width: 300px;
+}
+td.name-cell { color: var(--color-green); font-weight: 500; max-width: 350px; }
+td.cost-cell { color: var(--color-yellow); font-weight: 500; }
+td.wa-pos { color: var(--color-cyan); }
+td.wa-neg { color: var(--color-orange); }
+td.rel-vr { color: var(--color-green); }
+td.rel-ur { color: var(--color-red); }
+td.source-cell { color: var(--color-purple); font-size: 12px; }
+
+/* Cards view */
+.cards-wrap {
+  flex: 1; overflow-y: auto; background: var(--bg-content);
+  padding: 8px;
+}
+.cards-wrap::-webkit-scrollbar { width: 10px; }
+.cards-wrap::-webkit-scrollbar-thumb { background: #555; border-radius: 5px; }
+.card-group { margin-bottom: 24px; }
+.card-group-header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 8px 12px; margin-bottom: 8px;
+  border-bottom: 1px solid var(--border-weak);
+}
+.card-group-title {
+  font-size: 16px; font-weight: 500; color: var(--text-primary);
+}
+.card-group-count {
+  font-size: 12px; color: var(--text-minor);
+  background: var(--bg-elev2); padding: 2px 10px;
+  border-radius: 10px;
+}
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+.card {
+  background: var(--bg-content); border: 1px solid var(--border);
+  border-radius: 4px; cursor: pointer;
+  display: flex; flex-direction: column;
+  transition: all 0.15s; overflow: hidden;
+}
+.card:hover { background: var(--bg-hover); border-color: var(--text-minor); }
+.card.selected { border: 2px solid var(--accent); }
+.card-image {
+  width: 100%; height: 140px;
+  background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
+  display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+}
+.card-image::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(circle at 30% 40%, rgba(185, 13, 15, 0.15), transparent 60%);
+}
+.card-image i {
+  font-size: 56px; color: var(--accent); opacity: 0.5; z-index: 1;
+}
+.card-body { padding: 12px 14px; flex: 1; display: flex; flex-direction: column; }
+.card-name {
+  font-size: 15px; line-height: 1.2; font-weight: 500;
+  margin-bottom: 6px; word-wrap: break-word;
+}
+.card-name.green { color: var(--color-green); }
+.card-name.blue { color: var(--color-blue); }
+.card-name.purple { color: var(--color-purple); }
+.card-name.orange { color: var(--color-orange); }
+.card-sub {
+  font-size: 12px; opacity: 0.6; color: var(--text-secondary);
+  line-height: 1.4;
+}
+.card-sub .highlight { color: var(--color-cyan); opacity: 1; }
+.card-price {
+  margin-top: auto; padding-top: 8px;
+  font-size: 14px; color: var(--color-yellow); font-weight: 500;
+}
+
+/* Detail pane */
+.detail-pane {
+  width: 400px; background: var(--bg-content);
+  border-left: 1px solid var(--border-weak);
+  display: flex; flex-direction: column;
+  overflow: hidden; flex-shrink: 0;
+}
+.detail-pane.hidden { display: none; }
+.detail-header {
+  padding: 12px 16px; background: var(--bg-content);
+  border-bottom: 1px solid var(--border-weak);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.detail-title {
+  font-size: 18px; font-weight: 500; color: var(--text-primary);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  flex: 1; margin-right: 8px;
+}
+.detail-actions { display: flex; gap: 4px; }
+.btn-icon {
+  background: transparent; color: var(--text-secondary);
+  border: none; width: 32px; height: 32px; border-radius: 50%;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.btn-icon:hover { background: rgba(255,255,255,0.08); }
+.detail-body { flex: 1; overflow-y: auto; padding-bottom: 20px; }
+.detail-body::-webkit-scrollbar { width: 8px; }
+.detail-body::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; }
+.detail-image {
+  width: 100%; height: 200px;
+  background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
+  display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+  border-bottom: 1px solid var(--border-weak);
+}
+.detail-image::before {
+  content: ''; position: absolute; inset: 0;
+  background: 
+    radial-gradient(circle at 20% 30%, rgba(185, 13, 15, 0.15), transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(44, 151, 245, 0.1), transparent 50%);
+}
+.detail-image i { font-size: 80px; color: var(--accent); opacity: 0.6; z-index: 1; }
+.detail-image .category-tag {
+  position: absolute; top: 12px; left: 12px;
+  background: var(--accent); color: #fff;
+  padding: 4px 10px; border-radius: 4px;
+  font-size: 11px; font-weight: 500; z-index: 2;
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.detail-section { padding: 16px; border-bottom: 6px solid var(--bg-main); }
+.detail-section:last-child { border-bottom: none; }
+.detail-field { margin-bottom: 12px; }
+.detail-field:last-child { margin-bottom: 0; }
+.detail-label {
+  color: var(--text-minor); font-size: 11px;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  margin-bottom: 4px; font-weight: 500;
+}
+.detail-value {
+  color: var(--text-primary); font-size: 14px;
+  line-height: 1.5; word-wrap: break-word;
+}
+.detail-value.highlight { color: var(--color-yellow); font-weight: 500; font-size: 16px; }
+.detail-value.green { color: var(--color-green); }
+.detail-value.purple { color: var(--color-purple); }
+.detail-value.cyan { color: var(--color-cyan); }
+.detail-value.orange { color: var(--color-orange); }
+.detail-value.red { color: var(--color-red); }
+.detail-value.blue { color: var(--color-blue); }
+.detail-notes {
+  color: var(--text-secondary); font-size: 13px; line-height: 1.6;
+  background: var(--bg-elev); padding: 12px;
+  border-radius: 4px; border-left: 3px solid var(--accent);
+}
+.stat-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+}
+.stat-box {
+  background: var(--bg-elev); padding: 10px 12px;
+  border-radius: 4px; border: 1px solid var(--border-weak);
+}
+.stat-box .stat-label {
+  font-size: 10px; color: var(--text-minor);
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.stat-box .stat-value {
+  font-size: 18px; font-weight: 500;
+  color: var(--text-primary); margin-top: 2px;
+}
+.empty-state {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  height: 100%; color: var(--text-minor);
+  padding: 40px; text-align: center;
+}
+.empty-state i { font-size: 60px; margin-bottom: 16px; opacity: 0.3; }
+.empty-state h3 { font-size: 18px; margin-bottom: 8px; color: var(--text-secondary); }
+
+/* Mobile responsive */
+@media (max-width: 900px) {
+  .header { padding: 0 8px; gap: 4px; }
+  .app-title { display: none; }
+  .search-box { height: 36px; padding: 0 10px; }
+  .search-box i { font-size: 14px; margin-right: 6px; }
+  .search-box input { font-size: 13px; }
+  .view-toggle button { padding: 5px 8px; font-size: 12px; }
+  .icon-btn { width: 36px; height: 36px; font-size: 14px; }
+  .sidebar { width: 64px; }
+  .sidebar .nav-label, .sidebar .nav-section-title,
+  .sidebar .nav-divider, .sidebar .count { display: none; }
+  .sidebar .nav-item { justify-content: center; padding: 12px 0; margin: 2px 8px; }
+  .sidebar .nav-item i { margin: 0; font-size: 18px; }
+  .detail-pane {
+    width: 100%; position: absolute; right: 0; top: 56px;
+    bottom: 0; z-index: 50;
+  }
+  .view-title { font-size: 16px; }
+  .subnav { padding: 10px 12px 8px; }
+}
+@media (max-width: 600px) {
+  .view-toggle button span { display: none; }
+  .view-toggle button { padding: 6px 10px; }
+  .search-box { max-width: none; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="header">
+    <button class="menu-btn" id="menuToggle" title="Меню"><i class="fas fa-bars"></i></button>
+    <div class="app-title">DATATERM</div>
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input type="text" id="searchInput" placeholder="Поиск по базе DATATERM...">
+    </div>
+    <div class="header-actions">
+      <div class="view-toggle">
+        <button id="viewTable" class="active" title="Таблица"><i class="fas fa-table"></i></button>
+        <button id="viewCards" title="Карточки"><i class="fas fa-th"></i></button>
+      </div>
+      <div class="dropdown" id="columnsDropdown">
+        <button class="icon-btn" id="columnsBtn" title="Настройка колонок"><i class="fas fa-columns"></i></button>
+        <div class="dropdown-menu columns-panel" id="columnsMenu"></div>
+      </div>
+      <div class="dropdown" id="sortDropdown">
+        <button class="icon-btn" id="sortBtn" title="Сортировка"><i class="fas fa-sort"></i></button>
+        <div class="dropdown-menu" id="sortMenu"></div>
+      </div>
+    </div>
+  </header>
+
+  <div class="main">
+    <aside class="sidebar" id="sidebar"></aside>
+
+    <div class="content">
+      <div class="table-pane">
+        <div class="subnav">
+          <div class="subnav-top">
+            <div class="view-title" id="viewTitle">Все предметы</div>
+            <div class="view-actions">
+              <button class="btn-icon" id="filterBtn" title="Фильтры"><i class="fas fa-filter"></i></button>
+            </div>
+          </div>
+          <div class="filters-bar" id="filtersBar"></div>
+        </div>
+
+        <div id="contentArea" style="flex:1;display:flex;overflow:hidden;"></div>
+      </div>
+
+      <aside class="detail-pane hidden" id="detailPane">
+        <div class="detail-header">
+          <div class="detail-title" id="detailTitle">-</div>
+          <div class="detail-actions">
+            <button class="btn-icon" id="closeDetail" title="Закрыть"><i class="fas fa-times"></i></button>
+          </div>
+        </div>
+        <div class="detail-body" id="detailBody"></div>
+      </aside>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============ DATABASE ============
+const DB = [
+  // FASHIONWARE
+  {cat:'fashionware', name:'Биомонитор (Biomonitor)', type:'Fashion', surg:'N', desc:'+2 к сопротивлению пыткам и наркотикам', cost:100, hl:1, source:'CP20', icon:'fa-heart-pulse'},
+  {cat:'fashionware', name:'Продвинутый биомонитор', type:'Fashion', surg:'MA', desc:'Трансляция данных на 2 км', cost:200, hl:2, source:'CB3', icon:'fa-heart-pulse'},
+  {cat:'fashionware', name:'Подкожные часы (Skinwatch)', type:'Fashion', surg:'N', desc:'Встроенные часы под кожей', cost:50, hl:1, source:'CP20', icon:'fa-clock'},
+  {cat:'fashionware', name:'Световая татуировка', type:'Fashion', surg:'N', desc:'Декоративная светящаяся татуировка', cost:20, hl:0.5, source:'CP20', icon:'fa-pen-nib'},
+  {cat:'fashionware', name:'Хим-кожа (ChemSkins)', type:'Fashion', surg:'N', desc:'Химическое изменение оттенка кожи', cost:200, hl:3, source:'CP20', icon:'fa-palette'},
+  {cat:'fashionware', name:'Синт-кожа (Synthskins)', type:'Fashion', surg:'N', desc:'Искусственная кожа с узорами', cost:400, hl:5, source:'CP20', icon:'fa-palette'},
+  {cat:'fashionware', name:'Кожа настроения (Mood Skin)', type:'Fashion', surg:'N', desc:'Меняет цвет в зависимости от настроения', cost:200, hl:5, source:'Chr3', icon:'fa-palette'},
+  {cat:'fashionware', name:'ТВ-кожа Nu-Tek', type:'Fashion', surg:'M', desc:'Кожа становится видеоэкраном', cost:600, hl:7, source:'Chr4', icon:'fa-tv'},
+  {cat:'fashionware', name:'Тех-волосы (Techhair)', type:'Fashion', surg:'M', desc:'Светящиеся/цветные искусственные волосы', cost:150, hl:2, source:'CP20', icon:'fa-head-side'},
+  {cat:'fashionware', name:'Дисплей фрагов (Kill Display)', type:'Fashion', surg:'N', desc:'3-значный счётчик убийств', cost:100, hl:1, source:'Chr2', icon:'fa-skull'},
+  {cat:'fashionware', name:'Ногти "Включайся"', type:'Fashion', surg:'N', desc:'Ногти, меняющие цвет', cost:200, hl:1, source:'Chr3', icon:'fa-hand-sparkles'},
+  // NEURALWARE
+  {cat:'neuralware', name:'Нейронный процессор', type:'Neural', surg:'M', desc:'Базовый процессор (обязателен для всех систем)', cost:1000, hl:5, source:'CP20', icon:'fa-microchip'},
+  {cat:'neuralware', name:'Улучшенный процессор ЦРУ', type:'Neural', surg:'M', desc:'Чипы навыков +8, риск снижения INT', cost:2000, hl:5, source:'RM', icon:'fa-microchip'},
+  {cat:'neuralware', name:'Бустер Керензикова', type:'Neural', surg:'N', desc:'+1 к Инициативе за уровень (до +2)', cost:500, hl:5, source:'CP20', icon:'fa-bolt'},
+  {cat:'neuralware', name:'Ускоритель Сандевистан', type:'Neural', surg:'N', desc:'+3 к Инициативе на 5 ходов', cost:1600, hl:5, source:'CP20', icon:'fa-bolt'},
+  {cat:'neuralware', name:'Ускоритель Ubermensch', type:'Neural', surg:'N', desc:'+2 к Инициативе на 5 ходов', cost:1600, hl:5, source:'ET', icon:'fa-bolt'},
+  {cat:'neuralware', name:'Тактильное усиление', type:'Neural', surg:'N', desc:'Повышенная осязательная чувствительность (+2)', cost:100, hl:2, source:'CP20', icon:'fa-hand'},
+  {cat:'neuralware', name:'Обонятельное усиление', type:'Neural', surg:'N', desc:'Усиленное обоняние (+2 Awareness)', cost:100, hl:2, source:'CP20', icon:'fa-wind'},
+  {cat:'neuralware', name:'Редактор боли', type:'Neural', surg:'N', desc:'Снижение сложности проверок Выносливости', cost:200, hl:10, source:'CP20', icon:'fa-shield-heart'},
+  {cat:'neuralware', name:'Линк смартгана', type:'Neural', surg:'N', desc:'+2 к атакам из смартгана', cost:100, hl:2, source:'CP20', icon:'fa-link'},
+  {cat:'neuralware', name:'Транспортный линк', type:'Neural', surg:'N', desc:'+2 к управлению кибер-транспортом', cost:100, hl:3, source:'CP20', icon:'fa-car'},
+  {cat:'neuralware', name:'Интерфейсные разъемы', type:'Neural', surg:'M', desc:'Прямое подключение к смартганам', cost:200, hl:5, source:'CP20', icon:'fa-plug'},
+  {cat:'neuralware', name:'Разъем для чипов', type:'Neural', surg:'N', desc:'Гнездо на 10 чипов', cost:200, hl:5, source:'CP20', icon:'fa-sim-card'},
+  {cat:'neuralware', name:'Позитронный усилитель', type:'Neural', surg:'MA', desc:'+2 к INT, риск перегрузки (10%)', cost:2000, hl:5, source:'I1.3', icon:'fa-brain'},
+  {cat:'neuralware', name:'Блок "Проводная голова"', type:'Neural', surg:'M', desc:'Стимуляция центров удовольствия мозга', cost:1500, hl:0, source:'I2.1', icon:'fa-brain'},
+  // CYBEROPTIC
+  {cat:'cyberoptic', name:'Базовый кибероптический глаз', type:'Cyberoptic', surg:'MA', desc:'Базовый модуль глаза (4 слота для опций)', cost:500, hl:10, source:'CP20', icon:'fa-eye'},
+  {cat:'cyberoptic', name:'Дистанционный глаз', type:'Cyberoptic', surg:'MA', desc:'Трансляция на 100м', cost:1500, hl:15, source:'Chr2', icon:'fa-eye'},
+  {cat:'cyberoptic', name:'Глаз-насекомое (Bug Eye)', type:'Cyberoptic', surg:'MA', desc:'Вмещает 6 опций', cost:750, hl:15, source:'Chr3', icon:'fa-eye'},
+  {cat:'cyberoptic', name:'Третий глаз', type:'Cyberoptic', surg:'CR', desc:'Максимум 2 доп. глаза. ATTR -1 за глаз', cost:750, hl:15, source:'Chr3', icon:'fa-eye'},
+  {cat:'cyberoptic', name:'Kiroshi MonoVision', type:'Cyberoptic', surg:'MA', desc:'6 слотов, +1 Notice, бонус инициативы', cost:650, hl:15, source:'Chr4', icon:'fa-eye'},
+  {cat:'cyberoptic', name:'Прицельная сетка', type:'Optic Opt', surg:'N', desc:'+1 ко всем атакам Смартгана', cost:400, hl:2, source:'CP20', icon:'fa-crosshairs'},
+  {cat:'cyberoptic', name:'Телеоптика', type:'Optic Opt', surg:'N', desc:'Возможность телескопа до 20x', cost:150, hl:0.5, source:'CP20', icon:'fa-binoculars'},
+  {cat:'cyberoptic', name:'Усиление слабого света', type:'Optic Opt', surg:'N', desc:'Видимость в сумерках', cost:200, hl:0.5, source:'CP20', icon:'fa-moon'},
+  {cat:'cyberoptic', name:'Инфракрасное зрение', type:'Optic Opt', surg:'N', desc:'Видимость в полной темноте', cost:200, hl:1, source:'CP20', icon:'fa-temperature-high'},
+  {cat:'cyberoptic', name:'Термограф', type:'Optic Opt', surg:'N', desc:'Видимость тепловых узоров', cost:200, hl:1, source:'CP20', icon:'fa-temperature-high'},
+  {cat:'cyberoptic', name:'Анти-ослепление', type:'Optic Opt', surg:'N', desc:'Иммунитет к вспышкам и лазерам', cost:200, hl:0.5, source:'CP20', icon:'fa-sun'},
+  {cat:'cyberoptic', name:'Микро-видео оптика', type:'Optic Opt', surg:'N', desc:'Запись до 20 минут видео (2 слота)', cost:300, hl:0.5, source:'CP20', icon:'fa-video'},
+  {cat:'cyberoptic', name:'Игольник (Dartgun)', type:'Optic Opt', surg:'N', desc:'1 ядовитая игла. Дальность 1м (3 слота)', cost:200, hl:2, source:'CP20', icon:'fa-bullseye'},
+  {cat:'cyberoptic', name:'Оптический лазер', type:'Optic Opt', surg:'N', desc:'Урон 2d6, 1 выстрел, 0.5м (3 слота)', cost:800, hl:3, source:'P1', icon:'fa-bolt'},
+  // CYBERAUDIO
+  {cat:'cyberaudio', name:'Базовый кибераудио модуль', type:'Cyberaudio', surg:'M', desc:'Базовый слуховой модуль (6 слотов)', cost:500, hl:10, source:'CP20', icon:'fa-headphones'},
+  {cat:'cyberaudio', name:'Усиленный слух', type:'Audio Opt', surg:'N', desc:'+1 Awareness (звук)', cost:200, hl:1, source:'CP20', icon:'fa-ear-listen'},
+  {cat:'cyberaudio', name:'Радиолинк', type:'Audio Opt', surg:'N', desc:'Радиосвязь до 1 мили', cost:100, hl:1, source:'CP20', icon:'fa-radio'},
+  {cat:'cyberaudio', name:'Телефонный узел', type:'Audio Opt', surg:'N', desc:'Полная сотовая связь', cost:150, hl:1, source:'CP20', icon:'fa-phone'},
+  {cat:'cyberaudio', name:'Скремблер', type:'Audio Opt', surg:'N', desc:'Кодирование связи', cost:100, hl:0.5, source:'CP20', icon:'fa-lock'},
+  {cat:'cyberaudio', name:'Детектор жучков', type:'Audio Opt', surg:'N', desc:'Обнаружение до 3м. Эффективность 60%', cost:200, hl:0.5, source:'CP20', icon:'fa-bug'},
+  {cat:'cyberaudio', name:'Анализатор голоса', type:'Audio Opt', surg:'N', desc:'+2 к Human Perception, Interrogation', cost:200, hl:1, source:'CP20', icon:'fa-wave-square'},
+  {cat:'cyberaudio', name:'Демпфер уровня', type:'Audio Opt', surg:'N', desc:'Авто-компенсация шума. -25% от Stun', cost:300, hl:0.5, source:'CP20', icon:'fa-volume-xmark'},
+  {cat:'cyberaudio', name:'Маячок (Homing Tracer)', type:'Audio Opt', surg:'N', desc:'Слежение за целью до 1 км', cost:200, hl:0.5, source:'CP20', icon:'fa-location-dot'},
+  // CYBERLIMBS
+  {cat:'cyberlimbs', name:'Стандартная киберрука', type:'Cyberlimb', surg:'CR', desc:'20/30 SDP, 4 слота, удар 1d6', cost:3000, hl:10, source:'CP20', icon:'fa-hand-fist'},
+  {cat:'cyberlimbs', name:'Стандартная кибернога', type:'Cyberlimb', surg:'CR', desc:'20/30 SDP, 3 слота, удар 2d6', cost:2000, hl:10, source:'CP20', icon:'fa-person-walking'},
+  {cat:'cyberlimbs', name:'Кристаллическая рука', type:'Cyberlimb', surg:'CR', desc:'50/60 SDP, 4 слота, удар 1d6', cost:7000, hl:10, source:'Chr1', icon:'fa-hand-fist'},
+  {cat:'cyberlimbs', name:'Кристаллическая нога', type:'Cyberlimb', surg:'CR', desc:'50/60 SDP, 3 слота, удар 2d6', cost:6000, hl:10, source:'Chr1', icon:'fa-person-walking'},
+  {cat:'cyberlimbs', name:'Гигантская рука', type:'Cyberlimb', surg:'CR', desc:'SDP 30/40, REF-2, удар 3d6, SP 20', cost:4000, hl:10, source:'Chr3', icon:'fa-hand-fist'},
+  {cat:'cyberlimbs', name:'Ноги "Корвет" базовые', type:'Cyberlimb', surg:'CR', desc:'+3 MA, бонус к проверкам движения', cost:4500, hl:15, source:'Chr4', icon:'fa-person-running'},
+  {cat:'cyberlimbs', name:'Ноги "Пуля"', type:'Cyberlimb', surg:'CRx2', desc:'MA 16, прыжок 10м', cost:4500, hl:20, source:'SOF', icon:'fa-person-running'},
+  {cat:'cyberlimbs', name:'Рука-щупальце', type:'Cyberlimb', surg:'CR', desc:'8 щупалец по 70 см, SDP 5 каждое', cost:4000, hl:25, source:'I2.2', icon:'fa-worm'},
+  {cat:'cyberlimbs', name:'Молот-кисть (HammerHand)', type:'Cyberhand', surg:'N', desc:'Кулак с гидропоршнем. Урон 1d10', cost:600, hl:10, source:'CP20', icon:'fa-hand-back-fist'},
+  {cat:'cyberlimbs', name:'Пила-кисть (BuzzHand)', type:'Cyberhand', surg:'N', desc:'Электрическая цепная пила. Урон 2d6+2', cost:600, hl:10, source:'CP20', icon:'fa-hand-back-fist'},
+  {cat:'cyberlimbs', name:'Кисть-захват', type:'Cyberhand', surg:'N', desc:'Реактивный гарпун, 30м троса', cost:350, hl:3, source:'CP20', icon:'fa-hand-back-fist'},
+  {cat:'cyberlimbs', name:'Электро-кулак (Lightning Fist)', type:'Cyberhand', surg:'N', desc:'Электричество: 2d6+1 урона', cost:900, hl:10, source:'RPI', icon:'fa-bolt'},
+  // BODY WEAPONS
+  {cat:'cyberweapons', name:'Скретчеры (Scratchers)', type:'Body Wpn', surg:'N', desc:'Руки. Урон 1d6/3', cost:100, hl:10, source:'CP20', icon:'fa-hand-dots'},
+  {cat:'cyberweapons', name:'Рипперы (Rippers)', type:'Body Wpn', surg:'M', desc:'Руки. Урон 1d6+3', cost:400, hl:15, source:'CP20', icon:'fa-hand-dots'},
+  {cat:'cyberweapons', name:'Волверы (Wolvers)', type:'Body Wpn', surg:'M', desc:'Руки. Урон 3d6', cost:600, hl:16, source:'CP20', icon:'fa-hand-dots'},
+  {cat:'cyberweapons', name:'Слайс-н-Дайс', type:'Body Wpn', surg:'M', desc:'Руки. Мононить, урон 2d6', cost:700, hl:15, source:'CP20', icon:'fa-hand-dots'},
+  {cat:'cyberweapons', name:'Киберзмея', type:'Body Wpn', surg:'MA', desc:'Самоуправляемое оружие. Урон 1d6', cost:1200, hl:20, source:'CP20', icon:'fa-worm'},
+  {cat:'cyberweapons', name:'Киберзмея Мк2', type:'Body Wpn', surg:'MA', desc:'Урон 2d6 при критическом попадании', cost:1600, hl:20, source:'CP20', icon:'fa-worm'},
+  {cat:'cyberweapons', name:'Костяной шип', type:'Body Wpn', surg:'MA', desc:'Выдвижной костяной шип. Урон 1d6+4', cost:1000, hl:10, source:'Chr3', icon:'fa-bone'},
+  {cat:'cyberweapons', name:'Огнемет Spitfire', type:'Body Wpn', surg:'MA', desc:'Мини-огнемет, 4 выстрела, 4м', cost:1000, hl:20, source:'ER', icon:'fa-fire'},
+  {cat:'cyberweapons', name:'Вживленные клыки', type:'Body Wpn', surg:'N', desc:'Урон 1d6/3', cost:200, hl:15, source:'CP20', icon:'fa-teeth'},
+  {cat:'cyberweapons', name:'Мандибулы', type:'Body Wpn', surg:'MA', desc:'Укус 2d6', cost:1200, hl:25, source:'I2.2', icon:'fa-teeth-open'},
+  {cat:'cyberweapons', name:'Киберчелюсть Тирекс', type:'Body Wpn', surg:'MA', desc:'Металлическая челюсть SP 6. Укус 3d6', cost:3000, hl:16, source:'P2', icon:'fa-teeth-open'},
+  // NANOTECH
+  {cat:'nanotech', name:'Плетение мышц и костей', type:'Nanotech', surg:'N', desc:'Повышает BODY на +2', cost:1500, hl:5, source:'CP20', icon:'fa-dna'},
+  {cat:'nanotech', name:'Кожное плетение (Skinweave)', type:'Nanotech', surg:'N', desc:'Бронирование всего тела SP 12', cost:2000, hl:10, source:'CP20', icon:'fa-shield'},
+  {cat:'nanotech', name:'Улучшенное кожное плетение SP 10', type:'Nanotech', surg:'N', desc:'SP 10. Без потери ATTR', cost:1600, hl:7, source:'Chr2', icon:'fa-shield'},
+  {cat:'nanotech', name:'Плетение-спасатель', type:'Nanotech', surg:'N', desc:'+1 к лечению в день', cost:4500, hl:7, source:'Chr1', icon:'fa-shield'},
+  {cat:'nanotech', name:'Хим-плетение', type:'Nanotech', surg:'N', desc:'+4 к хим-сейвам. SP 8 vs кислота', cost:2000, hl:7, source:'DS', icon:'fa-shield'},
+  {cat:'nanotech', name:'Термо-плетение', type:'Nanotech', surg:'N', desc:'Сопротивление жаре до 107°F', cost:1500, hl:7, source:'DS', icon:'fa-shield'},
+  {cat:'nanotech', name:'Вак-плетение', type:'Nanotech', surg:'MA', desc:'Защита от декомпрессии', cost:5000, hl:5, source:'DS', icon:'fa-shield'},
+  {cat:'nanotech', name:'Плетение "Акула" полное', type:'Nanotech', surg:'N', desc:'SP 12 по всему телу. Урон 1d6/3', cost:12000, hl:15, source:'SA', icon:'fa-shield'},
+  {cat:'nanotech', name:'Нанохирурги', type:'Nanotech', surg:'N', desc:'Удваивают естественную скорость лечения', cost:6000, hl:5, source:'CP20', icon:'fa-user-doctor'},
+  {cat:'nanotech', name:'Нанотех против чумы', type:'Nanotech', surg:'N', desc:'+3 против болезней и био-оружия', cost:1750, hl:0.5, source:'Chr1', icon:'fa-shield-virus'},
+  {cat:'nanotech', name:'Бронеплетение', type:'Nanotech', surg:'N', desc:'+1 BODY, SP 18, -1 REF', cost:4000, hl:5, source:'Chr2', icon:'fa-shield'},
+  // BIOWARE
+  {cat:'bioware', name:'Пересаженные мышцы', type:'Bioware', surg:'MA', desc:'BODY +1. Макс +2', cost:1000, hl:10, source:'CP20', icon:'fa-dumbbell'},
+  {cat:'bioware', name:'Улучшенные антитела', type:'Bioware', surg:'N', desc:'Лечение +1 пункт в день', cost:3000, hl:5, source:'CP20', icon:'fa-shield-virus'},
+  {cat:'bioware', name:'Связыватели токсинов', type:'Bioware', surg:'N', desc:'+4 к сейвам против ядов/наркотиков', cost:3000, hl:5, source:'CP20', icon:'fa-shield-virus'},
+  {cat:'bioware', name:'Скелетное усиление "Альфа"', type:'Bioware', surg:'M', desc:'BODY +1 для веса и BTM', cost:1300, hl:5, source:'Chr4', icon:'fa-bone'},
+  {cat:'bioware', name:'Нейронный мост', type:'Bioware', surg:'MA', desc:'Амбидекстрия', cost:600, hl:7, source:'Chr4', icon:'fa-brain'},
+  {cat:'bioware', name:'Ядовитые железы (зубы)', type:'Bioware', surg:'MA', desc:'Клыки, впрыскивающие яд', cost:500, hl:15, source:'Chr4', icon:'fa-teeth'},
+  {cat:'bioware', name:'Феромоны "Любовь"', type:'Bioware', surg:'M', desc:'+1 к Seduction', cost:1000, hl:5, source:'Chr4', icon:'fa-heart'},
+  {cat:'bioware', name:'Феромоны "Доверчивость"', type:'Bioware', surg:'M', desc:'+1 к Persuasion', cost:2000, hl:5, source:'Chr4', icon:'fa-handshake'},
+  {cat:'bioware', name:'Узел свертываемости', type:'Bioware', surg:'MA', desc:'Раны считаются на 1 уровень слабее', cost:3000, hl:5, source:'Chr4', icon:'fa-droplet'},
+  {cat:'bioware', name:'Бустер полного спектра', type:'Bioware', surg:'N', desc:'+4 vs болезни/яды/наркотики', cost:7500, hl:3, source:'NEO', icon:'fa-shield-virus'},
+  // IMPLANTS
+  {cat:'implants', name:'Назальные фильтры', type:'Implant', surg:'M', desc:'Очистка воздуха (70%)', cost:60, hl:2, source:'CP20', icon:'fa-wind'},
+  {cat:'implants', name:'Жабры для пресной воды', type:'Implant', surg:'MA', desc:'Дыхание под водой до 4 часов', cost:400, hl:15, source:'CP20', icon:'fa-fish'},
+  {cat:'implants', name:'Секс-имплант Mr Studd', type:'Implant', surg:'MA', desc:'+1 к Seduction', cost:300, hl:10, source:'CP20', icon:'fa-heart'},
+  {cat:'implants', name:'Подкожный карман', type:'Implant', surg:'M', desc:'Карман 2"x4" с молнией', cost:200, hl:10, source:'CP20', icon:'fa-briefcase'},
+  {cat:'implants', name:'Адреналиновый бустер', type:'Implant', surg:'M', desc:'+1 к REF на 1d6+2 хода', cost:400, hl:10, source:'CP20', icon:'fa-bolt'},
+  {cat:'implants', name:'Подкожная броня SP 18', type:'Implant', surg:'CR', desc:'Бронирование торса SP 18', cost:1200, hl:10, source:'CP20', icon:'fa-shield'},
+  {cat:'implants', name:'Детектор движения', type:'Implant', surg:'M', desc:'Зона 20 кв.м. Эффективность 70%', cost:200, hl:10, source:'CP20', icon:'fa-radar'},
+  {cat:'implants', name:'Киберпечень T-Maxx', type:'Implant', surg:'MA', desc:'+4 против проглоченных ядов', cost:450, hl:5, source:'Chr1', icon:'fa-flask'},
+  {cat:'implants', name:'Децентрализованное сердце', type:'Implant', surg:'CR', desc:'+2 к Death Saves при ранениях торса', cost:1300, hl:7, source:'Chr1', icon:'fa-heart-pulse'},
+  {cat:'implants', name:'Эндо-каркас Базовый', type:'Implant', surg:'SCR', desc:'BOD +3, +1 урон в ББ, SP 10', cost:12000, hl:13, source:'Chr3', icon:'fa-person'},
+  {cat:'implants', name:'Эндо-каркас Орбитальный', type:'Implant', surg:'SCR', desc:'BOD +3, +2 урон, SP 12', cost:25000, hl:15, source:'Chr3', icon:'fa-person'},
+  // FULL BORGS
+  {cat:'fullborgs', name:'Класс Альфа', type:'Full Borg', surg:'CRx2', desc:'REF 10, MA 10, BOD 12, SP 25', cost:40000, hl:60, source:'Chr2', icon:'fa-robot'},
+  {cat:'fullborgs', name:'Водолей (подводный)', type:'Full Borg', surg:'CRx2', desc:'REF 10, MA 10, BOD 15, SP 25', cost:50000, hl:70, source:'Chr2', icon:'fa-robot'},
+  {cat:'fullborgs', name:'Коперник (космический)', type:'Full Borg', surg:'CRx2', desc:'REF 11, MA 10, BOD 12, SP 25', cost:60000, hl:75, source:'Chr2', icon:'fa-robot'},
+  {cat:'fullborgs', name:'Эклипс (скрытные операции)', type:'Full Borg', surg:'CRx2', desc:'REF 13, MA 13, BOD 12, SP 25', cost:65000, hl:85, source:'Chr2', icon:'fa-robot'},
+  {cat:'fullborgs', name:'Энфорсер (безопасность)', type:'Full Borg', surg:'CRx2', desc:'REF 12, MA 15, BOD 12, SP 30', cost:55000, hl:85, source:'Chr2', icon:'fa-robot'},
+  {cat:'fullborgs', name:'Драгун (военный)', type:'Full Borg', surg:'CRx2', desc:'REF 15, MA 25, BOD 20, SP 40', cost:120000, hl:170, source:'Chr2', icon:'fa-robot'},
+  {cat:'fullborgs', name:'Самсон (индустриальный)', type:'Full Borg', surg:'CRx2', desc:'REF 10, MA 10, BOD 18, SP 25', cost:50000, hl:80, source:'Chr2', icon:'fa-robot'},
+  // LIGHT PISTOLS
+  {cat:'pistol-light', name:'Budget Arms C-13', type:'Light Pistol', wa:-1, con:'P', avail:'E', damage:'1d6', ammo:'5mm', shots:8, rof:2, rel:'ST', range:50, cost:75, source:'CP20', icon:'fa-gun'},
+  {cat:'pistol-light', name:'Astra Style-6', type:'Light Pistol', wa:-1, con:'P', avail:'E', damage:'1d6', ammo:'5mm', shots:6, rof:2, rel:'UR', range:50, cost:75, source:'ES', icon:'fa-gun'},
+  {cat:'pistol-light', name:'Federated Arms Impact', type:'Light Pistol', wa:1, con:'J', avail:'E', damage:'1d6', ammo:'.22', shots:10, rof:2, rel:'VR', range:50, cost:60, source:'SOF', icon:'fa-gun'},
+  {cat:'pistol-light', name:'Federated Arms .22', type:'Light Pistol', wa:0, con:'J', avail:'E', damage:'1d6', ammo:'.22', shots:10, rof:2, rel:'ST', range:50, cost:40, source:'SOF', icon:'fa-gun'},
+  {cat:'pistol-light', name:'Ruger MKII Standard', type:'Light Pistol', wa:2, con:'J', avail:'C', damage:'1d6', ammo:'.22', shots:13, rof:2, rel:'ST', range:50, cost:25, source:'CP13', icon:'fa-gun'},
+  {cat:'pistol-light', name:'Tokarev 1933 TT-33', type:'Light Pistol', wa:1, con:'J', avail:'C', damage:'1d6+1', ammo:'7.65', shots:8, rof:2, rel:'VR', range:50, cost:50, source:'CP13', icon:'fa-gun'},
+  {cat:'pistol-light', name:'Mauser M 1896', type:'Light Pistol', wa:2, con:'J', avail:'E', damage:'1d6+1', ammo:'7.65', shots:10, rof:2, rel:'ST', range:50, cost:50, source:'CP13', icon:'fa-gun'},
+  {cat:'pistol-light', name:'Dai Lung Cybermag 15', type:'Light Pistol', wa:-1, con:'P', avail:'C', damage:'1d6+1', ammo:'6mm', shots:10, rof:2, rel:'UR', range:50, cost:50, source:'CP20', icon:'fa-gun'},
+  {cat:'pistol-light', name:'Federated Arms X-22', type:'Light Pistol', wa:0, con:'J', avail:'E', damage:'1d6+1', ammo:'6mm', shots:10, rof:2, rel:'ST', range:50, cost:100, source:'CP20', icon:'fa-gun'},
+  {cat:'pistol-light', name:'Towa 12 Police Pistol', type:'Light Pistol', wa:3, con:'J', avail:'P', damage:'1d6+1', ammo:'6mm', shots:8, rof:2, rel:'VR', range:50, cost:450, source:'PAC', icon:'fa-gun'},
+  {cat:'pistol-light', name:'H&K P-11', type:'Light Pistol', wa:0, con:'J', avail:'P', damage:'4d6+1', ammo:'6mm R', shots:5, rof:1, rel:'VR', range:50, cost:700, source:'ES', icon:'fa-gun'},
+  {cat:'pistol-light', name:'Colt .38 "Detective"', type:'Light Pistol', wa:1, con:'J', avail:'C', damage:'1d6+2', ammo:'.38', shots:6, rof:1, rel:'VR', range:50, cost:50, source:'CP20', icon:'fa-gun'},
+  {cat:'pistol-light', name:'Federated Arms X-38', type:'Light Pistol', wa:1, con:'J', avail:'E', damage:'2d6', ammo:'.38', shots:10, rof:2, rel:'ST', range:50, cost:35, source:'SOF', icon:'fa-gun'},
+  // MEDIUM PISTOLS
+  {cat:'pistol-medium', name:'Medium Autopistol', type:'Medium Pistol', wa:0, con:'J', avail:'C', damage:'2d6+1', ammo:'9mm', shots:10, rof:2, rel:'ST', range:50, cost:300, source:'CGen', icon:'fa-gun'},
+  {cat:'pistol-medium', name:'Militech Arms Avenger', type:'Medium Pistol', wa:0, con:'J', avail:'E', damage:'2d6+1', ammo:'9mm', shots:10, rof:2, rel:'VR', range:50, cost:250, source:'CP20', icon:'fa-gun'},
+  {cat:'pistol-medium', name:'Federated Arms X-9', type:'Medium Pistol', wa:0, con:'J', avail:'E', damage:'2d6+1', ammo:'9mm', shots:12, rof:2, rel:'ST', range:50, cost:300, source:'CP20', icon:'fa-gun'},
+  {cat:'pistol-medium', name:'Goncz-Taurus Pistol', type:'Medium Pistol', wa:0, con:'J', avail:'E', damage:'2d6+1', ammo:'9mm', shots:15, rof:2, rel:'ST', range:50, cost:200, source:'Chr1', icon:'fa-gun'},
+  {cat:'pistol-medium', name:'Beretta M97P', type:'Medium Pistol', wa:2, con:'J', avail:'P', damage:'2d6+1', ammo:'9mm', shots:18, rof:2, rel:'VR', range:50, cost:480, source:'ES', icon:'fa-gun'},
+  {cat:'pistol-medium', name:'Towa 14 Pistol', type:'Medium Pistol', wa:2, con:'J', avail:'P', damage:'2d6+1', ammo:'9mm', shots:16, rof:3, rel:'VR', range:50, cost:520, source:'PAC', icon:'fa-gun'},
+  {cat:'pistol-medium', name:'FN High Power', type:'Medium Pistol', wa:1, con:'J', avail:'C', damage:'2d6+1', ammo:'9mm', shots:14, rof:2, rel:'VR', range:50, cost:150, source:'UK', icon:'fa-gun'},
+  {cat:'pistol-medium', name:'Glock 17', type:'Medium Pistol', wa:2, con:'J', avail:'C', damage:'2d6+1', ammo:'9mm', shots:17, rof:2, rel:'VR', range:50, cost:150, source:'CP13', icon:'fa-gun'},
+  {cat:'pistol-medium', name:'Walther PPK', type:'Medium Pistol', wa:1, con:'P', avail:'C', damage:'2d6+1', ammo:'9mm', shots:7, rof:2, rel:'ST', range:50, cost:100, source:'CP13', icon:'fa-gun'},
+  {cat:'pistol-medium', name:'Sig Sauer P-210-2', type:'Medium Pistol', wa:2, con:'J', avail:'P', damage:'2d6+1', ammo:'9mm', shots:8, rof:2, rel:'VR', range:50, cost:150, source:'CP13', icon:'fa-gun'},
+  {cat:'pistol-medium', name:'Colt Alpha-Omega .45', type:'Medium Pistol', wa:2, con:'J', avail:'C', damage:'2d6+2', ammo:'.45', shots:10, rof:2, rel:'VR', range:50, cost:500, source:'Chr1', icon:'fa-gun'},
+  {cat:'pistol-medium', name:'Dai Lung Streetmaster', type:'Medium Pistol', wa:0, con:'J', avail:'E', damage:'2d6+3', ammo:'10mm', shots:12, rof:2, rel:'UR', range:50, cost:250, source:'CP20', icon:'fa-gun'},
+  {cat:'pistol-medium', name:'Colt Alpha-Omega 10', type:'Medium Pistol', wa:2, con:'J', avail:'C', damage:'2d6+3', ammo:'10mm', shots:10, rof:2, rel:'VR', range:50, cost:500, source:'Chr1', icon:'fa-gun'},
+  {cat:'pistol-medium', name:'Arasaka WSA', type:'Medium Pistol', wa:0, con:'J', avail:'C', damage:'2d6+3', ammo:'10mm', shots:15, rof:2, rel:'VR', range:50, cost:400, source:'CB1', icon:'fa-gun'},
+  {cat:'pistol-medium', name:'Towa 13 Police Pistol', type:'Medium Pistol', wa:2, con:'J', avail:'P', damage:'2d6+3', ammo:'10mm', shots:12, rof:2, rel:'VR', range:50, cost:500, source:'PAC', icon:'fa-gun'},
+  {cat:'pistol-medium', name:'Desert Eagle', type:'Medium Pistol', wa:1, con:'J', avail:'C', damage:'2d6+3', ammo:'.357', shots:9, rof:2, rel:'VR', range:50, cost:250, source:'CP13', icon:'fa-gun'},
+  {cat:'pistol-medium', name:'S&W Combat Magnum', type:'Medium Pistol', wa:1, con:'J', avail:'C', damage:'2d6+3', ammo:'.357', shots:6, rof:2, rel:'VR', range:50, cost:150, source:'CP20', icon:'fa-gun'},
+  {cat:'pistol-medium', name:'Tsunami Express', type:'Medium Pistol', wa:3, con:'L', avail:'P', damage:'2d6+3', ammo:'5.2 ET', shots:24, rof:3, rel:'VR', range:75, cost:5300, source:'SOF2', icon:'fa-gun'},
+  {cat:'pistol-medium', name:'Militech Black Widow', type:'Medium Pistol', wa:1, con:'J', avail:'P', damage:'1/2d6', ammo:'Flec', shots:10, rof:2, rel:'ST', range:30, cost:400, source:'DS', icon:'fa-gun'},
+  // HEAVY PISTOLS
+  {cat:'pistol-heavy', name:'Heavy Autopistol', type:'Heavy Pistol', wa:-1, con:'J', avail:'E', damage:'3d6', ammo:'11mm', shots:10, rof:2, rel:'VR', range:50, cost:500, source:'CGen', icon:'fa-gun'},
+  {cat:'pistol-heavy', name:'Sternmeyer Type 35', type:'Heavy Pistol', wa:0, con:'J', avail:'C', damage:'3d6', ammo:'11mm', shots:8, rof:2, rel:'VR', range:50, cost:400, source:'CP20', icon:'fa-gun'},
+  {cat:'pistol-heavy', name:'Mustang Arms Mark II', type:'Heavy Pistol', wa:1, con:'L', avail:'C', damage:'3d6', ammo:'11mm', shots:20, rof:3, rel:'VR', range:50, cost:425, source:'SOF2', icon:'fa-gun'},
+  {cat:'pistol-heavy', name:'Nova 757 Cityhunter', type:'Heavy Pistol', wa:2, con:'J', avail:'P', damage:'3d6', ammo:'11mm', shots:18, rof:2, rel:'ST', range:50, cost:480, source:'BH', icon:'fa-gun'},
+  {cat:'pistol-heavy', name:'Baretta M20-F', type:'Heavy Pistol', wa:1, con:'J', avail:'C', damage:'3d6+3', ammo:'-', shots:15, rof:3, rel:'VR', range:50, cost:750, source:'P1', icon:'fa-gun'},
+  {cat:'pistol-heavy', name:'Tsunami Raimei Ramjet', type:'Heavy Pistol', wa:2, con:'L', avail:'P', damage:'5d6-7d6+1', ammo:'RJ', shots:6, rof:2, rel:'VR', range:100, cost:1100, source:'SOF2', icon:'fa-gun'},
+  {cat:'pistol-heavy', name:'Malorian Hvy Flechette', type:'Heavy Pistol', wa:1, con:'J', avail:'C', damage:'1d6+1', ammo:'4mm', shots:25, rof:2, rel:'ST', range:50, cost:595, source:'Chr1', icon:'fa-gun'},
+  {cat:'pistol-heavy', name:'Espinoza One Shot', type:'Heavy Pistol', wa:-1, con:'J', avail:'E', damage:'3d6', ammo:'.50', shots:1, rof:1, rel:'UR', range:50, cost:75, source:'SOF', icon:'fa-gun'},
+  {cat:'pistol-heavy', name:'.44 Mag Revolver', type:'Very Heavy Pistol', wa:0, con:'J', avail:'P', damage:'4d6', ammo:'.44', shots:6, rof:1, rel:'VR', range:50, cost:375, source:'NEO', icon:'fa-gun'},
+  {cat:'pistol-heavy', name:'Very Heavy Autopistol', type:'Very Heavy Pistol', wa:0, con:'J', avail:'E', damage:'4d6+1', ammo:'12mm', shots:8, rof:1, rel:'VR', range:50, cost:800, source:'CGen', icon:'fa-gun'},
+  {cat:'pistol-heavy', name:'Armalite 44', type:'Very Heavy Pistol', wa:0, con:'J', avail:'E', damage:'4d6+1', ammo:'12mm', shots:8, rof:1, rel:'ST', range:50, cost:450, source:'CP20', icon:'fa-gun'},
+  {cat:'pistol-heavy', name:'Enfield Spitfire', type:'Very Heavy Pistol', wa:1, con:'J', avail:'P', damage:'4d6+1', ammo:'12mm', shots:12, rof:1, rel:'VR', range:50, cost:550, source:'UK', icon:'fa-gun'},
+  {cat:'pistol-heavy', name:'Nova Arms "Stallone"', type:'Very Heavy Pistol', wa:1, con:'J', avail:'P', damage:'4d6', ammo:'.357 ET', shots:6, rof:2, rel:'VR', range:60, cost:999, source:'SOF2', icon:'fa-gun'},
+  {cat:'pistol-heavy', name:'Nova Arms "Eastwood"', type:'Very Heavy Pistol', wa:1, con:'J', avail:'P', damage:'6d6', ammo:'.44 ET', shots:6, rof:2, rel:'VR', range:80, cost:1499, source:'SOF2', icon:'fa-gun'},
+  {cat:'pistol-heavy', name:'Malorian Arms 3516', type:'Very Heavy Pistol', wa:-1, con:'J', avail:'R', damage:'6d6', ammo:'14mm', shots:6, rof:1, rel:'VR', range:50, cost:4525, source:'Chr1', icon:'fa-gun'},
+  // SMGs
+  {cat:'smg', name:'Vz61 Skorpion', type:'SMG', wa:2, con:'J', avail:'P', damage:'1d6+1', ammo:'.25', shots:20, rof:25, rel:'VR', range:150, cost:200, source:'CP20', icon:'fa-gun'},
+  {cat:'smg', name:'Ingram MAC 11', type:'SMG', wa:-1, con:'J', avail:'C', damage:'1d6+2', ammo:'.380', shots:32, rof:35, rel:'UR', range:150, cost:250, source:'CP13', icon:'fa-gun'},
+  {cat:'smg', name:'Uzi Miniauto 9', type:'SMG', wa:1, con:'J', avail:'E', damage:'2d6+1', ammo:'9mm', shots:30, rof:35, rel:'VR', range:150, cost:475, source:'CP20', icon:'fa-gun'},
+  {cat:'smg', name:'H&K MPK-9', type:'SMG', wa:1, con:'J', avail:'C', damage:'2d6+1', ammo:'9mm', shots:35, rof:25, rel:'ST', range:200, cost:520, source:'CP20', icon:'fa-gun'},
+  {cat:'smg', name:'UZI SMG', type:'SMG', wa:2, con:'J', avail:'C', damage:'2d6+1', ammo:'9mm', shots:30, rof:20, rel:'VR', range:150, cost:250, source:'CP20', icon:'fa-gun'},
+  {cat:'smg', name:'H&K MP5/MP5K', type:'SMG', wa:1, con:'L', avail:'C', damage:'2d6+1', ammo:'9mm', shots:30, rof:20, rel:'ST', range:200, cost:300, source:'CP13', icon:'fa-gun'},
+  {cat:'smg', name:'Ingram MAC 10', type:'SMG', wa:-1, con:'J', avail:'C', damage:'2d6+2', ammo:'.45', shots:30, rof:5, rel:'UR', range:200, cost:250, source:'CP20', icon:'fa-gun'},
+  {cat:'smg', name:'Arasaka Minami 10', type:'SMG', wa:0, con:'J', avail:'E', damage:'2d6+3', ammo:'10mm', shots:40, rof:20, rel:'VR', range:200, cost:500, source:'CP20', icon:'fa-gun'},
+  {cat:'smg', name:'Militech Viper', type:'SMG', wa:0, con:'J', avail:'P', damage:'2d6+3', ammo:'10mm', shots:40, rof:30, rel:'VR', range:200, cost:600, source:'HoB', icon:'fa-gun'},
+  {cat:'smg', name:'H&K MP-2013', type:'SMG', wa:1, con:'J', avail:'C', damage:'2d6+3', ammo:'10mm', shots:35, rof:32, rel:'ST', range:200, cost:450, source:'CP20', icon:'fa-gun'},
+  {cat:'smg', name:'Thompson M1', type:'SMG', wa:2, con:'N', avail:'C', damage:'2d6+2', ammo:'.45', shots:30, rof:20, rel:'ST', range:200, cost:250, source:'CP20', icon:'fa-gun'},
+  {cat:'smg', name:'Sternmeyer SMG 21', type:'SMG', wa:-1, con:'L', avail:'E', damage:'3d6', ammo:'11mm', shots:30, rof:15, rel:'VR', range:200, cost:500, source:'CP20', icon:'fa-gun'},
+  {cat:'smg', name:'H&K MPK-11', type:'SMG', wa:0, con:'L', avail:'C', damage:'4d6+1', ammo:'12mm', shots:30, rof:20, rel:'ST', range:200, cost:700, source:'CP20', icon:'fa-gun'},
+  {cat:'smg', name:'Bushmaster', type:'SMG', wa:0, con:'L', avail:'R', damage:'5d6', ammo:'5.56', shots:30, rof:20, rel:'ST', range:200, cost:1000, source:'CP20', icon:'fa-gun'},
+  // SHOTGUNS
+  {cat:'shotgun', name:'Arasaka Rapid 12', type:'Shotgun', wa:-1, con:'N', avail:'C', damage:'4d6', ammo:'12ga', shots:20, rof:'2/10', rel:'ST', range:50, cost:900, source:'CP20', icon:'fa-gun'},
+  {cat:'shotgun', name:'Militech Bulldog', type:'Shotgun', wa:0, con:'L', avail:'P', damage:'4d6', ammo:'12ga', shots:21, rof:'3/10', rel:'ST', range:50, cost:1000, source:'CB2', icon:'fa-gun'},
+  {cat:'shotgun', name:'CAWS', type:'Shotgun', wa:0, con:'N', avail:'R', damage:'4d6', ammo:'12ga', shots:10, rof:10, rel:'ST', range:50, cost:500, source:'CP20', icon:'fa-gun'},
+  {cat:'shotgun', name:'H&K CAWS 11', type:'Shotgun', wa:1, con:'N', avail:'R', damage:'4d6', ammo:'12ga', shots:30, rof:10, rel:'ST', range:50, cost:800, source:'UK', icon:'fa-gun'},
+  {cat:'shotgun', name:'Ithaca Stakeout', type:'Shotgun', wa:-1, con:'L', avail:'C', damage:'4d6', ammo:'12ga', shots:8, rof:2, rel:'ST', range:50, cost:200, source:'CP13', icon:'fa-gun'},
+  {cat:'shotgun', name:'Atchison Assault', type:'Shotgun', wa:-1, con:'N', avail:'R', damage:'4d6', ammo:'12ga', shots:20, rof:10, rel:'ST', range:50, cost:500, source:'CP20', icon:'fa-gun'},
+  {cat:'shotgun', name:'Tsunami "Ragnarok"', type:'Shotgun', wa:0, con:'N', avail:'R', damage:'6d6', ammo:'12ga ET', shots:40, rof:'2/20', rel:'ST', range:70, cost:4500, source:'PAC', icon:'fa-gun'},
+  {cat:'shotgun', name:'Luigi Franchi King Buck', type:'Shotgun', wa:-1, con:'N', avail:'P', damage:'6d6', ammo:'10ga', shots:4, rof:'2/4', rel:'VR', range:50, cost:800, source:'Chr2', icon:'fa-gun'},
+  // ASSAULT RIFLES
+  {cat:'rifle', name:'AK-47 / AKM', type:'Assault Rifle', wa:0, con:'N', avail:'E', damage:'5d6', ammo:'7.62', shots:30, rof:20, rel:'VR', range:400, cost:300, source:'CP20', icon:'fa-gun'},
+  {cat:'rifle', name:'AKR-20 Medium Assault', type:'Assault Rifle', wa:0, con:'N', avail:'C', damage:'5d6', ammo:'5.45', shots:30, rof:30, rel:'ST', range:400, cost:500, source:'CP20', icon:'fa-gun'},
+  {cat:'rifle', name:'AK 74', type:'Assault Rifle', wa:0, con:'N', avail:'C', damage:'5d6', ammo:'5.45', shots:30, rof:20, rel:'VR', range:400, cost:300, source:'CP13', icon:'fa-gun'},
+  {cat:'rifle', name:'M-16A', type:'Assault Rifle', wa:2, con:'N', avail:'C', damage:'5d6', ammo:'5.56', shots:30, rof:25, rel:'UR', range:400, cost:300, source:'CP20', icon:'fa-gun'},
+  {cat:'rifle', name:'Steyr AUG', type:'Assault Rifle', wa:2, con:'L', avail:'P', damage:'5d6', ammo:'5.56', shots:30, rof:20, rel:'VR', range:400, cost:400, source:'CP20', icon:'fa-gun'},
+  {cat:'rifle', name:'SA-80', type:'Assault Rifle', wa:2, con:'N', avail:'P', damage:'5d6', ammo:'5.56', shots:30, rof:20, rel:'VR', range:400, cost:600, source:'ES', icon:'fa-gun'},
+  {cat:'rifle', name:'Militech Ronin Light', type:'Assault Rifle', wa:1, con:'N', avail:'C', damage:'5d6', ammo:'5.56', shots:35, rof:30, rel:'VR', range:400, cost:450, source:'CP20', icon:'fa-gun'},
+  {cat:'rifle', name:'Sternmeyer M-95A4', type:'Assault Rifle', wa:1, con:'N', avail:'R', damage:'5d6', ammo:'5.56', shots:90, rof:30, rel:'VR', range:400, cost:750, source:'CB1', icon:'fa-gun'},
+  {cat:'rifle', name:'FN-RAL Heavy Assault', type:'Assault Rifle', wa:-1, con:'N', avail:'C', damage:'6d6+2', ammo:'7.62', shots:30, rof:30, rel:'VR', range:400, cost:600, source:'CP20', icon:'fa-gun'},
+  {cat:'rifle', name:'Kalashnikov A-80', type:'Assault Rifle', wa:-1, con:'N', avail:'E', damage:'6d6+2', ammo:'7.62', shots:35, rof:25, rel:'ST', range:400, cost:550, source:'CP20', icon:'fa-gun'},
+  {cat:'rifle', name:'FN-FAL', type:'Assault Rifle', wa:0, con:'N', avail:'C', damage:'6d6+2', ammo:'7.62', shots:20, rof:20, rel:'VR', range:400, cost:450, source:'UK', icon:'fa-gun'},
+  {cat:'rifle', name:'Militech Mk V', type:'Assault Rifle', wa:1, con:'N', avail:'P', damage:'9d6', ammo:'6.5 ET', shots:20, rof:4, rel:'ST', range:600, cost:1500, source:'SW', icon:'fa-gun'},
+  {cat:'rifle', name:'Militech M-31a1 AICW', type:'Assault Rifle', wa:2, con:'N', avail:'R', damage:'4d6', ammo:'4.5mm', shots:150, rof:30, rel:'ST', range:400, cost:1695, source:'Chr1', icon:'fa-gun'},
+  // SNIPERS
+  {cat:'sniper', name:'Winchester M70', type:'Sniper Rifle', wa:3, con:'N', avail:'C', damage:'5d6+1', ammo:'30-06', shots:5, rof:1, rel:'VR', range:500, cost:250, source:'CP20', icon:'fa-crosshairs'},
+  {cat:'sniper', name:'Nomad 7.62 Bolt-Act.', type:'Sniper Rifle', wa:2, con:'N', avail:'C', damage:'6d6+2', ammo:'7.62', shots:6, rof:1, rel:'VR', range:400, cost:500, source:'NEO', icon:'fa-crosshairs'},
+  {cat:'sniper', name:'FR-F6', type:'Sniper Rifle', wa:3, con:'N', avail:'P', damage:'6d6+2', ammo:'7.62', shots:10, rof:2, rel:'ST', range:500, cost:1100, source:'ES', icon:'fa-crosshairs'},
+  {cat:'sniper', name:'WA 2001 Sniper Rifle', type:'Sniper Rifle', wa:3, con:'N', avail:'R', damage:'6d6+2', ammo:'7.62', shots:10, rof:1, rel:'VR', range:1000, cost:900, source:'UK', icon:'fa-crosshairs'},
+  {cat:'sniper', name:'Towa Type-00-Kai', type:'Sniper Rifle', wa:3, con:'N', avail:'R', damage:'9d6+3', ammo:'7.62 ET', shots:6, rof:1, rel:'VR', range:1200, cost:3000, source:'PAC', icon:'fa-crosshairs'},
+  {cat:'sniper', name:'Barrett-Arasaka 20mm HVY', type:'Sniper Rifle', wa:0, con:'N', avail:'R', damage:'4d10', ammo:'20mm', shots:10, rof:1, rel:'VR', range:450, cost:2000, source:'CP20', icon:'fa-crosshairs'},
+  {cat:'sniper', name:'Barrett M-90', type:'Sniper Rifle', wa:3, con:'N', avail:'R', damage:'6d10', ammo:'12.7', shots:10, rof:1, rel:'VR', range:1000, cost:1500, source:'HoB', icon:'fa-crosshairs'},
+  {cat:'sniper', name:'Arasaka WSSX', type:'Sniper Rifle', wa:3, con:'N', avail:'R', damage:'4d6x1d3', ammo:'20mm FF', shots:13, rof:1, rel:'VR', range:600, cost:3600, source:'SF', icon:'fa-crosshairs'},
+  {cat:'sniper', name:'Barrett-Arasaka WSSE', type:'Sniper Rifle', wa:1, con:'N', avail:'R', damage:'8d10+3', ammo:'.50 ET', shots:10, rof:1, rel:'VR', range:1000, cost:2500, source:'SW', icon:'fa-crosshairs'},
+  // HEAVY WEAPONS
+  {cat:'heavy', name:'FN MG-6 One-on-One', type:'Heavy Weapon', wa:1, con:'N', avail:'P', damage:'5d6', ammo:'5.56', shots:100, rof:40, rel:'VR', range:450, cost:1800, source:'ES', icon:'fa-gun'},
+  {cat:'heavy', name:'Militech M-232 SAW', type:'Heavy Weapon', wa:0, con:'N', avail:'P', damage:'5d6', ammo:'5.56', shots:100, rof:20, rel:'VR', range:400, cost:1000, source:'HoB', icon:'fa-gun'},
+  {cat:'heavy', name:'M-60D Machine Gun', type:'Heavy Weapon', wa:1, con:'N', avail:'P', damage:'6d6+2', ammo:'7.62', shots:100, rof:20, rel:'VR', range:500, cost:1000, source:'HoB', icon:'fa-gun'},
+  {cat:'heavy', name:'FN-MAG Machine gun', type:'Heavy Weapon', wa:0, con:'N', avail:'R', damage:'6d6+2', ammo:'7.62', shots:250, rof:30, rel:'VR', range:1000, cost:1500, source:'UK', icon:'fa-gun'},
+  {cat:'heavy', name:'M2A5HB Browning .50', type:'Heavy Weapon', wa:0, con:'N', avail:'P', damage:'6d10', ammo:'12.7', shots:100, rof:10, rel:'VR', range:600, cost:2000, source:'HoB', icon:'fa-gun'},
+  {cat:'heavy', name:'Militech 20L Autocan.', type:'Heavy Weapon', wa:0, con:'N', avail:'R', damage:'8d10', ammo:'20mm', shots:100, rof:10, rel:'VR', range:500, cost:3000, source:'HoB', icon:'fa-gun'},
+  {cat:'heavy', name:'Rhinemetall EMG-85', type:'Heavy Weapon', wa:3, con:'N', avail:'R', damage:'5d10+10 EAP', ammo:'-', shots:5, rof:2, rel:'ST', range:1500, cost:11370, source:'Chr2', icon:'fa-bolt'},
+  {cat:'heavy', name:'1cm Rail Cannon', type:'Heavy Weapon', wa:2, con:'N', avail:'R', damage:'10d10 EAP', ammo:'10mm', shots:50, rof:2, rel:'ST', range:1000, cost:750000, source:'MM', icon:'fa-bolt'},
+  {cat:'heavy', name:'Militech RPG-A', type:'Heavy Weapon', wa:-2, con:'N', avail:'R', damage:'6d10 HEAT', ammo:'-', shots:1, rof:1, rel:'VR', range:750, cost:1500, source:'MM', icon:'fa-bomb'},
+  {cat:'heavy', name:'LAW', type:'Heavy Weapon', wa:-2, con:'L', avail:'P', damage:'4d10 HEAT', ammo:'-', shots:1, rof:1, rel:'VR', range:200, cost:300, source:'MM', icon:'fa-bomb'},
+  {cat:'heavy', name:'Militech Hotshot LATGM', type:'Heavy Weapon', wa:2, con:'N', avail:'P', damage:'12d10 HEAT', ammo:'-', shots:1, rof:1, rel:'VR', range:1000, cost:2500, source:'MM', icon:'fa-bomb'},
+  {cat:'heavy', name:'Militech Anvil-2 HATGM', type:'Heavy Weapon', wa:2, con:'N', avail:'P', damage:'18d10 HEAT', ammo:'-', shots:1, rof:1, rel:'VR', range:3000, cost:10000, source:'MM', icon:'fa-bomb'},
+  // MELEE
+  {cat:'melee', name:'Нож (Knife)', type:'Melee', wa:0, con:'P', avail:'C', damage:'1d6', ammo:'-', shots:0, rof:0, rel:'-', range:1, cost:20, source:'CP20', icon:'fa-khanda'},
+  {cat:'melee', name:'Кастет (Brass Knuckles)', type:'Melee', wa:0, con:'P', avail:'C', damage:'1d6+2', ammo:'-', shots:0, rof:0, rel:'-', range:1, cost:10, source:'CP20', icon:'fa-hand-fist'},
+  {cat:'melee', name:'Боевой нож', type:'Melee', wa:1, con:'J', avail:'P', damage:'1d6+3', ammo:'-', shots:0, rof:0, rel:'-', range:1, cost:70, source:'PAC', icon:'fa-khanda'},
+  {cat:'melee', name:'Мачете', type:'Melee', wa:0, con:'L', avail:'C', damage:'1d6+3', ammo:'-', shots:0, rof:0, rel:'-', range:1, cost:60, source:'NEO', icon:'fa-khanda'},
+  {cat:'melee', name:'Меч (Sword)', type:'Melee', wa:0, con:'N', avail:'C', damage:'2d6+2', ammo:'-', shots:0, rof:0, rel:'-', range:1, cost:100, source:'CP20', icon:'fa-khanda'},
+  {cat:'melee', name:'Дубинка Excalibur', type:'Melee', wa:0, con:'J', avail:'P', damage:'2d6+3', ammo:'-', shots:0, rof:0, rel:'-', range:1, cost:80, source:'P&S', icon:'fa-khanda'},
+  {cat:'melee', name:'Нунчаку', type:'Melee', wa:0, con:'L', avail:'C', damage:'3d6', ammo:'-', shots:0, rof:0, rel:'-', range:1, cost:15, source:'CP20', icon:'fa-khanda'},
+  {cat:'melee', name:'Тонфа', type:'Melee', wa:0, con:'L', avail:'C', damage:'3d6', ammo:'-', shots:0, rof:0, rel:'-', range:1, cost:15, source:'PAC', icon:'fa-khanda'},
+  {cat:'melee', name:'Нагината', type:'Melee', wa:0, con:'N', avail:'P', damage:'3d6', ammo:'-', shots:0, rof:0, rel:'-', range:2, cost:100, source:'CP20', icon:'fa-khanda'},
+  {cat:'melee', name:'Катана Arasaka', type:'Melee', wa:2, con:'N', avail:'R', damage:'3d6', ammo:'-', shots:0, rof:0, rel:'-', range:1, cost:0, source:'SW', icon:'fa-khanda'},
+  {cat:'melee', name:'Монокатана Kendachi', type:'Melee', wa:1, con:'N', avail:'R', damage:'4d6', ammo:'-', shots:0, rof:0, rel:'-', range:1, cost:600, source:'CP20', icon:'fa-khanda'},
+  {cat:'melee', name:'Мононагината Kendachi', type:'Melee', wa:0, con:'N', avail:'R', damage:'4d6', ammo:'-', shots:0, rof:0, rel:'-', range:2, cost:400, source:'CP20', icon:'fa-khanda'},
+  {cat:'melee', name:'Силовой меч Kendachi', type:'Melee', wa:0, con:'L', avail:'R', damage:'4d6', ammo:'-', shots:0, rof:0, rel:'-', range:1, cost:860, source:'Chr1', icon:'fa-khanda'},
+  {cat:'melee', name:'Титановая катана', type:'Melee', wa:1, con:'L', avail:'R', damage:'3d6+2', ammo:'-', shots:0, rof:0, rel:'-', range:1, cost:2850, source:'P1', icon:'fa-khanda'},
+  {cat:'melee', name:'Кувалда', type:'Melee', wa:-1, con:'N', avail:'C', damage:'4d6', ammo:'-', shots:0, rof:0, rel:'-', range:1, cost:20, source:'CP20', icon:'fa-khanda'},
+  {cat:'melee', name:'Бензопила', type:'Melee', wa:-3, con:'N', avail:'C', damage:'4d6', ammo:'-', shots:0, rof:0, rel:'-', range:2, cost:80, source:'CP20', icon:'fa-khanda'},
+  {cat:'melee', name:'Мононить', type:'Melee', wa:0, con:'P', avail:'R', damage:'3d6', ammo:'-', shots:0, rof:0, rel:'-', range:1, cost:60, source:'Chr2', icon:'fa-khanda'},
+  // CLOTHING
+  {cat:'clothing', name:'Бронекуртка (SP 14)', type:'Armor', surg:'-', desc:'Защита торса SP 14', cost:200, hl:0, source:'CP20', icon:'fa-vest'},
+  {cat:'clothing', name:'Бронеплащ (SP 18)', type:'Armor', surg:'-', desc:'Защита торса SP 18', cost:300, hl:0, source:'CP20', icon:'fa-vest'},
+  {cat:'clothing', name:'Бронированные чулки (SP 6)', type:'Armor', surg:'-', desc:'Защита ног SP 6', cost:110, hl:0, source:'CP20', icon:'fa-socks'},
+  {cat:'clothing', name:'Бронежилет Uniware (SP 10)', type:'Armor', surg:'-', desc:'Защита торса SP 10', cost:60, hl:0, source:'CP20', icon:'fa-vest'},
+  {cat:'clothing', name:'Плащ Дастер (SP 18)', type:'Armor', surg:'-', desc:'SP 18, +1 W&S', cost:845, hl:0, source:'CP20', icon:'fa-vest'},
+  {cat:'clothing', name:'Бронепальто Takanaka (SP 16)', type:'Armor', surg:'-', desc:'SP 16, деловой стиль', cost:2000, hl:0, source:'CP20', icon:'fa-vest-patches'},
+  {cat:'clothing', name:'Боевой зимний костюм Sternmeyer', type:'Armor', surg:'-', desc:'EV -1, защита от холода', cost:575, hl:0, source:'CP20', icon:'fa-mitten'},
+  {cat:'clothing', name:'Огнеупорный костюм Fiorelli', type:'Armor', surg:'-', desc:'Защита от огня', cost:1500, hl:0, source:'CP20', icon:'fa-fire'},
+  {cat:'clothing', name:'Медицинская броня (SP 20)', type:'Armor', surg:'-', desc:'SP 20, +2 Med, EV -3', cost:3400, hl:0, source:'CP20', icon:'fa-user-doctor'},
+  {cat:'clothing', name:'Шлем "Guercio" (SP 20)', type:'Armor', surg:'-', desc:'Защита головы SP 20', cost:600, hl:0, source:'CP20', icon:'fa-hard-hat'},
+  {cat:'clothing', name:'Баллистический шлем (SP 14)', type:'Armor', surg:'-', desc:'Защита головы SP 14', cost:350, hl:0, source:'CP20', icon:'fa-hard-hat'},
+  // GEAR
+  {cat:'gear', name:'Полевой набор подрывника', type:'Gear', surg:'-', desc:'30кг снаряжения', cost:1500, hl:0, source:'CP20', icon:'fa-bomb'},
+  {cat:'gear', name:'Противогаз', type:'Gear', surg:'-', desc:'Фильтры 10eb', cost:200, hl:0, source:'CP20', icon:'fa-mask-ventilator'},
+  {cat:'gear', name:'IR Combat Cloak', type:'Gear', surg:'-', desc:'-5 Notice, ИК-маскировка', cost:450, hl:0, source:'CP20', icon:'fa-user-ninja'},
+  {cat:'gear', name:'Dynlar Smartgrapple', type:'Gear', surg:'-', desc:'100м трос с лебедкой', cost:1500, hl:0, source:'CP20', icon:'fa-link'},
+  {cat:'gear', name:'Трос с кошкой', type:'Gear', surg:'-', desc:'100м', cost:60, hl:0, source:'CP20', icon:'fa-link'},
+  {cat:'gear', name:'Палатка на 2 персоны', type:'Gear', surg:'-', desc:'Базовое укрытие', cost:150, hl:0, source:'CP20', icon:'fa-campground'},
+  {cat:'gear', name:'Biotechnica Enviro Analyzer', type:'Gear', surg:'-', desc:'Анализатор среды', cost:70, hl:0, source:'CP20', icon:'fa-flask-vial'},
+  {cat:'gear', name:'Плазменный резак', type:'Gear', surg:'-', desc:'Резка металла', cost:250, hl:0, source:'CP20', icon:'fa-fire-flame-curved'},
+  {cat:'gear', name:'Миноискатель', type:'Gear', surg:'-', desc:'Обнаружение мин', cost:100, hl:0, source:'CP20', icon:'fa-magnifying-glass'},
+  {cat:'gear', name:'Базовый набор инструментов', type:'Gear', surg:'-', desc:'1кг, базовый ремонт', cost:500, hl:0, source:'CP20', icon:'fa-toolbox'},
+  {cat:'gear', name:'Techscanner', type:'Gear', surg:'-', desc:'Диагностика систем', cost:600, hl:0, source:'CP20', icon:'fa-stethoscope'},
+  // ELECTRONICS
+  {cat:'electronics', name:'Data Cache (100MU)', type:'Electronics', surg:'-', desc:'SDP 15, SP 30', cost:8000, hl:0, source:'CP20', icon:'fa-server'},
+  {cat:'electronics', name:'Zetatech E-Book', type:'Electronics', surg:'-', desc:'5 часов работы, 12MU', cost:100, hl:0, source:'CP20', icon:'fa-book'},
+  {cat:'electronics', name:'Microtech "PCZ Super"', type:'Electronics', surg:'-', desc:'INT 2, 30MU, 150мин', cost:1500, hl:0, source:'CP20', icon:'fa-laptop'},
+  {cat:'electronics', name:'Wyzard "Handbox"', type:'Electronics', surg:'-', desc:'INT 1, голоэкран', cost:6700, hl:0, source:'CP20', icon:'fa-laptop'},
+  {cat:'electronics', name:'Braindance Recording Unit', type:'Electronics', surg:'-', desc:'Запись брейнданса', cost:12000, hl:0, source:'CP20', icon:'fa-vr-cardboard'},
+  {cat:'electronics', name:'Braindance Editing Unit', type:'Electronics', surg:'-', desc:'Монтаж брейнданса', cost:26000, hl:0, source:'CP20', icon:'fa-vr-cardboard'},
+  {cat:'electronics', name:'Мультимедиа новостная камера', type:'Electronics', surg:'-', desc:'Профессиональная съёмка', cost:2600, hl:0, source:'CP20', icon:'fa-video'},
+  {cat:'electronics', name:'Ghost Projector', type:'Electronics', surg:'-', desc:'Голографический проектор', cost:1500, hl:0, source:'CP20', icon:'fa-ghost'},
+  {cat:'electronics', name:'Smartgoggle Mirrorshades', type:'Electronics', surg:'-', desc:'2 опции', cost:450, hl:0, source:'CP20', icon:'fa-glasses'},
+  {cat:'electronics', name:'Net-Vision Glasses', type:'Electronics', surg:'-', desc:'Очки сетевого зрения', cost:900, hl:0, source:'CP20', icon:'fa-glasses'},
+  {cat:'electronics', name:'Портативный радар', type:'Electronics', surg:'-', desc:'Обнаружение целей', cost:250, hl:0, source:'CP20', icon:'fa-radar'},
+];
+
+// ============ CATEGORIES CONFIG ============
+const CATEGORIES = [
+  { id:'all', label:'Все предметы', icon:'fa-database', section:'Каталог' },
+  { id:'divider1', divider:true, section:'Каталог' },
+  { id:'fashionware', label:'Fashionware', icon:'fa-palette', section:'Каталог' },
+  { id:'neuralware', label:'Neuralware', icon:'fa-brain', section:'Каталог' },
+  { id:'cyberoptic', label:'Cyberoptic', icon:'fa-eye', section:'Каталог' },
+  { id:'cyberaudio', label:'Cyberaudio', icon:'fa-headphones', section:'Каталог' },
+  { id:'cyberlimbs', label:'Cyberlimbs', icon:'fa-hand-rock', section:'Каталог' },
+  { id:'cyberweapons', label:'Body Weapons', icon:'fa-fist-raised', section:'Каталог' },
+  { id:'nanotech', label:'Nanotech', icon:'fa-atom', section:'Каталог' },
+  { id:'bioware', label:'Bioware', icon:'fa-dna', section:'Каталог' },
+  { id:'implants', label:'Implants', icon:'fa-syringe', section:'Каталог' },
+  { id:'fullborgs', label:'Full Borgs', icon:'fa-robot', section:'Каталог' },
+  { id:'divider2', divider:true, section:'Оружие' },
+  { id:'pistol-light', label:'Лёгкие пистолеты', icon:'fa-gun', section:'Оружие' },
+  { id:'pistol-medium', label:'Средние пистолеты', icon:'fa-gun', section:'Оружие' },
+  { id:'pistol-heavy', label:'Тяжёлые пистолеты', icon:'fa-gun', section:'Оружие' },
+  { id:'smg', label:'Пистолеты-пулемёты', icon:'fa-gun', section:'Оружие' },
+  { id:'shotgun', label:'Дробовики', icon:'fa-gun', section:'Оружие' },
+  { id:'rifle', label:'Штурмовые винтовки', icon:'fa-gun', section:'Оружие' },
+  { id:'sniper', label:'Снайперские', icon:'fa-crosshairs', section:'Оружие' },
+  { id:'heavy', label:'Тяжёлое оружие', icon:'fa-bomb', section:'Оружие' },
+  { id:'melee', label:'Ближний бой', icon:'fa-khanda', section:'Оружие' },
+  { id:'divider3', divider:true, section:'Снаряжение' },
+  { id:'clothing', label:'Одежда', icon:'fa-tshirt', section:'Снаряжение' },
+  { id:'gear', label:'Снаряжение', icon:'fa-briefcase', section:'Снаряжение' },
+  { id:'electronics', label:'Электроника', icon:'fa-microchip', section:'Снаряжение' },
+];
+
+// ============ COLUMN DEFINITIONS ============
+// All possible columns with their kind applicability
+const ALL_COLUMNS = {
+  name:     { label:'Название', kinds:['all','cyber','weapon','gear'], locked:true },
+  type:     { label:'Тип', kinds:['all','cyber','weapon','gear'] },
+  surg:     { label:'Сложность', kinds:['cyber'] },
+  desc:     { label:'Описание', kinds:['cyber','gear','all'] },
+  wa:       { label:'WA', kinds:['weapon'] },
+  damage:   { label:'Урон', kinds:['weapon'] },
+  range:    { label:'Дальн.', kinds:['weapon'] },
+  shots:    { label:'Магазин', kinds:['weapon'] },
+  rof:      { label:'СС', kinds:['weapon'] },
+  con:      { label:'Скр.', kinds:['weapon'] },
+  rel:      { label:'Над.', kinds:['weapon'] },
+  hl:       { label:'H.L.', kinds:['cyber'] },
+  cost:     { label:'Цена', kinds:['all','cyber','weapon','gear'], locked:true },
+  source:   { label:'Ист.', kinds:['all','cyber','weapon','gear'] },
+};
+
+// Default visible columns per kind
+const DEFAULT_VISIBLE = {
+  all:    ['name','type','meta','cost','source'],
+  cyber:  ['name','type','surg','desc','cost','hl','source'],
+  weapon: ['name','type','wa','damage','range','shots','rof','con','rel','cost','source'],
+  gear:   ['name','type','desc','cost','source'],
+};
+
+// Meta column for "all" view (special)
+const META_COLUMN = { label:'Характеристика', kinds:['all'] };
+
+function getCatalogKind(catId) {
+  if (catId === 'all') return 'all';
+  const cyber = ['fashionware','neuralware','cyberoptic','cyberaudio','cyberlimbs','cyberweapons','nanotech','bioware','implants','fullborgs'];
+  const weapon = ['pistol-light','pistol-medium','pistol-heavy','smg','shotgun','rifle','sniper','heavy','melee'];
+  const gear = ['clothing','gear','electronics'];
+  if (cyber.includes(catId)) return 'cyber';
+  if (weapon.includes(catId)) return 'weapon';
+  if (gear.includes(catId)) return 'gear';
+  return 'all';
+}
+
+const SORT_OPTIONS = {
+  all: [
+    { id:'name-asc', label:'Имя (А-Я)', icon:'fa-sort-alpha-down' },
+    { id:'name-desc', label:'Имя (Я-А)', icon:'fa-sort-alpha-up' },
+    { id:'cost-asc', label:'Цена (возр.)', icon:'fa-sort-numeric-down' },
+    { id:'cost-desc', label:'Цена (убыв.)', icon:'fa-sort-numeric-up' },
+  ],
+  cyber: [
+    { id:'name-asc', label:'Имя (А-Я)', icon:'fa-sort-alpha-down' },
+    { id:'name-desc', label:'Имя (Я-А)', icon:'fa-sort-alpha-up' },
+    { id:'cost-asc', label:'Цена (возр.)', icon:'fa-sort-numeric-down' },
+    { id:'cost-desc', label:'Цена (убыв.)', icon:'fa-sort-numeric-up' },
+    { id:'hl-desc', label:'Потеря человечности (макс)', icon:'fa-skull' },
+    { id:'hl-asc', label:'Потеря человечности (мин)', icon:'fa-heart' },
+    { id:'surg-asc', label:'Сложность операции', icon:'fa-user-doctor' },
+  ],
+  weapon: [
+    { id:'name-asc', label:'Имя (А-Я)', icon:'fa-sort-alpha-down' },
+    { id:'name-desc', label:'Имя (Я-А)', icon:'fa-sort-alpha-up' },
+    { id:'cost-asc', label:'Цена (возр.)', icon:'fa-sort-numeric-down' },
+    { id:'cost-desc', label:'Цена (убыв.)', icon:'fa-sort-numeric-up' },
+    { id:'damage-desc', label:'Урон (макс)', icon:'fa-burst' },
+    { id:'range-desc', label:'Дальность (макс)', icon:'fa-bullseye' },
+    { id:'wa-desc', label:'Точность WA (макс)', icon:'fa-crosshairs' },
+    { id:'shots-desc', label:'Магазин (макс)', icon:'fa-database' },
+  ],
+  gear: [
+    { id:'name-asc', label:'Имя (А-Я)', icon:'fa-sort-alpha-down' },
+    { id:'name-desc', label:'Имя (Я-А)', icon:'fa-sort-alpha-up' },
+    { id:'cost-asc', label:'Цена (возр.)', icon:'fa-sort-numeric-down' },
+    { id:'cost-desc', label:'Цена (убыв.)', icon:'fa-sort-numeric-up' },
+  ],
+};
+
+const FILTER_CONFIG = {
+  all: [
+    { id:'source', label:'Источник', icon:'fa-book', options: getSourceOptions() },
+    { id:'price', label:'Цена', icon:'fa-euro-sign', options: getPriceOptions() },
+  ],
+  cyber: [
+    { id:'source', label:'Источник', icon:'fa-book', options: getSourceOptions() },
+    { id:'price', label:'Цена', icon:'fa-euro-sign', options: getPriceOptions() },
+    { id:'surg', label:'Сложность операции', icon:'fa-user-doctor', options: [
+      { value:'', label:'Любая' },
+      { value:'N', label:'N — Незначительная' },
+      { value:'M', label:'M — Малая' },
+      { value:'MA', label:'MA — Серьёзная' },
+      { value:'CR', label:'CR — Критическая' },
+      { value:'CRx2', label:'CRx2 — Двойная критическая' },
+      { value:'SCR', label:'SCR — Супер-критическая' },
+    ]},
+    { id:'hl', label:'Потеря человечности', icon:'fa-skull', options: [
+      { value:'', label:'Любая' },
+      { value:'low', label:'Низкая (до 5)' },
+      { value:'mid', label:'Средняя (6-15)' },
+      { value:'high', label:'Высокая (16+)' },
+    ]},
+  ],
+  weapon: [
+    { id:'source', label:'Источник', icon:'fa-book', options: getSourceOptions() },
+    { id:'price', label:'Цена', icon:'fa-euro-sign', options: getPriceOptions() },
+    { id:'avail', label:'Доступность', icon:'fa-store', options: [
+      { value:'', label:'Любая' },
+      { value:'E', label:'E — Повсеместно' },
+      { value:'C', label:'C — Часто' },
+      { value:'P', label:'P — Редко' },
+      { value:'R', label:'R — Очень редко' },
+    ]},
+    { id:'con', label:'Скрытность', icon:'fa-eye-slash', options: [
+      { value:'', label:'Любая' },
+      { value:'P', label:'P — В кармане' },
+      { value:'J', label:'J — Под курткой' },
+      { value:'L', label:'L — Под плащом' },
+      { value:'N', label:'N — Нельзя скрыть' },
+    ]},
+    { id:'rel', label:'Надёжность', icon:'fa-shield', options: [
+      { value:'', label:'Любая' },
+      { value:'VR', label:'VR — Очень надёжное' },
+      { value:'ST', label:'ST — Стандартное' },
+      { value:'UR', label:'UR — Ненадёжное' },
+    ]},
+  ],
+  gear: [
+    { id:'source', label:'Источник', icon:'fa-book', options: getSourceOptions() },
+    { id:'price', label:'Цена', icon:'fa-euro-sign', options: getPriceOptions() },
+  ],
+};
+
+function getSourceOptions() {
+  const sources = [...new Set(DB.map(i => i.source).filter(Boolean))].sort();
+  return [{ value:'', label:'Все источники' }, ...sources.map(s => ({ value:s, label:s }))];
+}
+function getPriceOptions() {
+  return [
+    { value:'', label:'Любая цена' },
+    { value:'0-100', label:'до 100 eb' },
+    { value:'100-500', label:'100-500 eb' },
+    { value:'500-2000', label:'500-2000 eb' },
+    { value:'2000-10000', label:'2000-10000 eb' },
+    { value:'10000+', label:'10000+ eb' },
+  ];
+}
+
+// ============ STATE ============
+const state = {
+  category: 'all',
+  search: '',
+  filters: {},
+  sort: 'name-asc',
+  view: 'table',
+  selectedId: null,
+  visibleColumns: JSON.parse(JSON.stringify(DEFAULT_VISIBLE)),
+};
+
+// ============ HELPERS ============
+function parseCost(c) {
+  if (typeof c === 'number') return c;
+  const n = parseFloat(String(c).replace(/[^\d.]/g, ''));
+  return isNaN(n) ? 0 : n;
+}
+function parseHL(h) {
+  if (typeof h === 'number') return h;
+  const s = String(h);
+  const m = s.match(/(\d+)d(\d+)([+\-]\d+)?/);
+  if (m) {
+    const n = parseInt(m[1]), sides = parseInt(m[2]), mod = parseInt(m[3] || 0);
+    return (n * (sides + 1) / 2) + mod;
+  }
+  const num = parseFloat(s);
+  return isNaN(num) ? 0 : num;
+}
+function parseWA(w) { const n = parseInt(w); return isNaN(n) ? 0 : n; }
+function parseRange(r) { const n = parseInt(String(r).replace(/[^\d]/g, '')); return isNaN(n) ? 0 : n; }
+function parseDamage(d) {
+  if (!d) return 0;
+  const parts = String(d).split(/[\s\/x]+/);
+  let total = 0;
+  parts.forEach(p => {
+    const m = p.match(/(\d+)d(\d+)([+\-]\d+)?/);
+    if (m) {
+      const n = parseInt(m[1]), sides = parseInt(m[2]), mod = parseInt(m[3] || 0);
+      total += (n * (sides + 1) / 2) + mod;
+    } else {
+      const num = parseFloat(p);
+      if (!isNaN(num)) total += num;
+    }
+  });
+  return total;
+}
+
+const SURG_ORDER = { 'N':1, 'M':2, 'MA':3, 'CR':4, 'CRx2':5, 'SCR':6 };
+
+// ============ FILTERING & SORTING ============
+function getFiltered() {
+  let items = DB.map((it, i) => ({...it, _id: i}));
+  
+  if (state.category !== 'all') {
+    items = items.filter(it => it.cat === state.category);
+  }
+  if (state.search) {
+    const q = state.search.toLowerCase();
+    items = items.filter(it => 
+      (it.name && it.name.toLowerCase().includes(q)) ||
+      (it.desc && it.desc.toLowerCase().includes(q)) ||
+      (it.type && it.type.toLowerCase().includes(q)) ||
+      (it.source && it.source.toLowerCase().includes(q)) ||
+      (it.damage && it.damage.toLowerCase().includes(q)) ||
+      (it.ammo && it.ammo.toLowerCase().includes(q))
+    );
+  }
+  Object.keys(state.filters).forEach(key => {
+    const val = state.filters[key];
+    if (!val) return;
+    if (key === 'source') items = items.filter(it => it.source === val);
+    else if (key === 'price') {
+      if (val.includes('+')) {
+        const min = parseFloat(val);
+        items = items.filter(it => parseCost(it.cost) >= min);
+      } else {
+        const [min, max] = val.split('-').map(parseFloat);
+        items = items.filter(it => { const c = parseCost(it.cost); return c >= min && c <= max; });
+      }
+    }
+    else if (key === 'avail') items = items.filter(it => it.avail === val);
+    else if (key === 'con') items = items.filter(it => it.con === val);
+    else if (key === 'rel') items = items.filter(it => it.rel === val);
+    else if (key === 'surg') items = items.filter(it => it.surg === val);
+    else if (key === 'hl') {
+      if (val === 'low') items = items.filter(it => parseHL(it.hl) <= 5);
+      else if (val === 'mid') items = items.filter(it => { const h = parseHL(it.hl); return h > 5 && h <= 15; });
+      else if (val === 'high') items = items.filter(it => parseHL(it.hl) > 15);
+    }
+  });
+  
+  const [field, dir] = state.sort.split('-');
+  const mult = dir === 'asc' ? 1 : -1;
+  items.sort((a, b) => {
+    let va, vb;
+    switch(field) {
+      case 'name': va = a.name; vb = b.name; return va.localeCompare(vb, 'ru') * mult;
+      case 'cost': va = parseCost(a.cost); vb = parseCost(b.cost); break;
+      case 'wa': va = parseWA(a.wa); vb = parseWA(b.wa); break;
+      case 'range': va = parseRange(a.range); vb = parseRange(b.range); break;
+      case 'damage': va = parseDamage(a.damage); vb = parseDamage(b.damage); break;
+      case 'shots': va = parseInt(a.shots) || 0; vb = parseInt(b.shots) || 0; break;
+      case 'hl': va = parseHL(a.hl); vb = parseHL(b.hl); break;
+      case 'surg': va = SURG_ORDER[a.surg] || 99; vb = SURG_ORDER[b.surg] || 99; break;
+      case 'type': va = a.type; vb = b.type; return (va || '').localeCompare(vb || '', 'ru') * mult;
+      default: va = a.name; vb = b.name; return va.localeCompare(vb, 'ru') * mult;
+    }
+    return (va - vb) * mult;
+  });
+  return items;
+}
+
+// ============ RENDER ============
+const contentArea = document.getElementById('contentArea');
+const detailPane = document.getElementById('detailPane');
+const detailTitle = document.getElementById('detailTitle');
+const detailBody = document.getElementById('detailBody');
+const filtersBar = document.getElementById('filtersBar');
+const sortMenu = document.getElementById('sortMenu');
+const columnsMenu = document.getElementById('columnsMenu');
+
+function escapeHtml(s) {
+  if (s === undefined || s === null) return '';
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function formatCost(c) {
+  const n = parseCost(c);
+  if (n >= 1000000) return (n/1000000).toFixed(1) + 'M eb';
+  if (n >= 1000) return (n/1000).toFixed(n % 1000 === 0 ? 0 : 1) + 'K eb';
+  return n + ' eb';
+}
+function pluralize(n, one, two, five) {
+  let t = n % 10, h = n % 100;
+  if (h >= 11 && h <= 19) return five;
+  if (t === 1) return one;
+  if (t >= 2 && t <= 4) return two;
+  return five;
+}
+
+function getNameColorClass(item) {
+  if (item.avail === 'R') return 'rare';
+  if (item.cat === 'fullborgs' || item.cost > 50000) return 'purple';
+  if (item.hl > 20) return 'orange';
+  return '';
+}
+
+function renderSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  let html = '';
+  let currentSection = '';
+  CATEGORIES.forEach(cat => {
+    if (cat.divider) {
+      html += '<div class="nav-divider"></div>';
+      return;
+    }
+    if (cat.section !== currentSection) {
+      currentSection = cat.section;
+      html += `<div class="nav-section-title">${cat.section}</div>`;
+    }
+    const count = cat.id === 'all' ? DB.length : DB.filter(i => i.cat === cat.id).length;
+    html += `<div class="nav-item ${state.category === cat.id ? 'active' : ''}" data-cat="${cat.id}">
+      <i class="fas ${cat.icon}"></i>
+      <span class="nav-label">${cat.label}</span>
+      <span class="count">${count}</span>
+    </div>`;
+  });
+  sidebar.innerHTML = html;
+  sidebar.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+      state.category = item.dataset.cat;
+      const kind = getCatalogKind(state.category);
+      const validFilters = FILTER_CONFIG[kind].map(f => f.id);
+      Object.keys(state.filters).forEach(k => {
+        if (!validFilters.includes(k)) delete state.filters[k];
+      });
+      const validSorts = SORT_OPTIONS[kind].map(s => s.id);
+      if (!validSorts.includes(state.sort)) state.sort = 'name-asc';
+      renderAll();
+    });
+  });
+}
+
+function renderFilters() {
+  const kind = getCatalogKind(state.category);
+  const configs = FILTER_CONFIG[kind];
+  let html = '';
+  configs.forEach(cfg => {
+    const val = state.filters[cfg.id] || '';
+    const active = val ? 'active' : '';
+    html += `<div class="filter-chip ${active}" data-filter="${cfg.id}">
+      <i class="fas ${cfg.icon}"></i>
+      <select data-filter="${cfg.id}">
+        ${cfg.options.map(o => `<option value="${o.value}" ${o.value === val ? 'selected' : ''}>${o.label}</option>`).join('')}
+      </select>
+    </div>`;
+  });
+  const hasFilters = Object.values(state.filters).some(v => v);
+  if (hasFilters) {
+    html += `<button class="btn btn-ghost" id="clearFilters" style="background:transparent;color:var(--text-secondary);border:1px solid var(--border);padding:5px 12px;border-radius:16px;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;"><i class="fas fa-times"></i> Сбросить</button>`;
+  }
+  html += `<div class="results-count" id="resultsCount">0 предметов</div>`;
+  filtersBar.innerHTML = html;
+  
+  filtersBar.querySelectorAll('select').forEach(sel => {
+    sel.addEventListener('change', (e) => {
+      const key = e.target.dataset.filter;
+      state.filters[key] = e.target.value;
+      e.target.closest('.filter-chip').classList.toggle('active', !!e.target.value);
+      renderContent();
+      updateClearBtn();
+    });
+  });
+  const clearBtn = document.getElementById('clearFilters');
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      state.filters = {};
+      renderFilters();
+      renderContent();
+    });
+  }
+}
+
+function updateClearBtn() {
+  const hasFilters = Object.values(state.filters).some(v => v);
+  const existing = document.getElementById('clearFilters');
+  if (hasFilters && !existing) renderFilters();
+  else if (!hasFilters && existing) renderFilters();
+}
+
+function renderSortMenu() {
+  const kind = getCatalogKind(state.category);
+  const options = SORT_OPTIONS[kind];
+  sortMenu.innerHTML = options.map(o => 
+    `<div class="dropdown-item ${state.sort === o.id ? 'active' : ''}" data-sort="${o.id}">
+      <i class="fas ${o.icon}"></i> ${o.label}
+    </div>`
+  ).join('');
+  
+  sortMenu.querySelectorAll('.dropdown-item').forEach(item => {
+    item.addEventListener('click', () => {
+      state.sort = item.dataset.sort;
+      document.getElementById('sortDropdown').classList.remove('open');
+      renderSortMenu();
+      renderContent();
+    });
+  });
+}
+
+function renderColumnsMenu() {
+  const kind = getCatalogKind(state.category);
+  const visible = state.visibleColumns[kind] || [];
+  
+  // Build list of available columns for this kind
+  const availableCols = [];
+  Object.keys(ALL_COLUMNS).forEach(key => {
+    const col = ALL_COLUMNS[key];
+    if (col.kinds.includes(kind)) {
+      availableCols.push({ key, label: col.label, locked: col.locked });
+    }
+  });
+  // Add meta column for 'all'
+  if (kind === 'all') {
+    availableCols.splice(2, 0, { key:'meta', label: META_COLUMN.label, locked:false });
+  }
+  
+  let html = `<div class="panel-header">
+    <div class="panel-title">Колонки</div>
+    <div class="panel-actions">
+      <button class="panel-link" id="colsSelectAll">Все</button>
+      <button class="panel-link" id="colsReset">Сброс</button>
+    </div>
+  </div>`;
+  
+  availableCols.forEach(col => {
+    const isChecked = visible.includes(col.key);
+    const lockedClass = col.locked ? 'locked' : '';
+    const checkedClass = isChecked ? 'checked' : '';
+    html += `<div class="col-item ${checkedClass} ${lockedClass}" data-col="${col.key}">
+      <div class="col-checkbox"></div>
+      <div class="col-label">${col.label}${col.locked ? ' <i class="fas fa-lock" style="font-size:10px;opacity:0.5;"></i>' : ''}</div>
+    </div>`;
+  });
+  
+  columnsMenu.innerHTML = html;
+  
+  // Handlers
+  columnsMenu.querySelectorAll('.col-item:not(.locked)').forEach(item => {
+    item.addEventListener('click', () => {
+      const key = item.dataset.col;
+      const vis = state.visibleColumns[kind];
+      const idx = vis.indexOf(key);
+      if (idx >= 0) {
+        // Don't allow removing all columns
+        if (vis.length > 1) {
+          vis.splice(idx, 1);
+        }
+      } else {
+        vis.push(key);
+      }
+      renderColumnsMenu();
+      renderContent();
+    });
+  });
+  
+  const selectAllBtn = document.getElementById('colsSelectAll');
+  if (selectAllBtn) {
+    selectAllBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      state.visibleColumns[kind] = availableCols.map(c => c.key);
+      renderColumnsMenu();
+      renderContent();
+    });
+  }
+  
+  const resetBtn = document.getElementById('colsReset');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      state.visibleColumns[kind] = JSON.parse(JSON.stringify(DEFAULT_VISIBLE[kind]));
+      renderColumnsMenu();
+      renderContent();
+    });
+  }
+}
+
+function renderViewTitle() {
+  const cat = CATEGORIES.find(c => c.id === state.category);
+  document.getElementById('viewTitle').textContent = cat ? cat.label : state.category;
+}
+
+function renderContent() {
+  const items = getFiltered();
+  const resultsCount = document.getElementById('resultsCount');
+  if (resultsCount) {
+    resultsCount.textContent = `${items.length} ${pluralize(items.length, 'предмет', 'предмета', 'предметов')}`;
+  }
+  
+  if (state.view === 'table') renderTable(items);
+  else renderCards(items);
+}
+
+function renderTable(items) {
+  const kind = getCatalogKind(state.category);
+  const visibleCols = state.visibleColumns[kind] || DEFAULT_VISIBLE[kind];
+  
+  // Filter columns to those available for this kind
+  const cols = visibleCols.filter(key => {
+    if (key === 'meta') return kind === 'all';
+    const col = ALL_COLUMNS[key];
+    return col && col.kinds.includes(kind);
+  });
+  
+  let html = `<div class="table-wrap"><table><thead><tr>`;
+  cols.forEach(key => {
+    const col = key === 'meta' ? META_COLUMN : ALL_COLUMNS[key];
+    const sortField = getSortFieldForKey(key);
+    const isSorted = state.sort.startsWith(sortField + '-');
+    const dir = isSorted ? state.sort.split('-')[1] : '';
+    const arrow = isSorted ? (dir === 'asc' ? '▲' : '▼') : '';
+    html += `<th data-sort-field="${sortField}" class="${isSorted ? 'sorted' : ''}">
+      ${col.label} <span class="sort-indicator">${arrow}</span>
+    </th>`;
+  });
+  html += `</tr></thead><tbody>`;
+  
+  if (items.length === 0) {
+    html += `<tr><td colspan="${cols.length}" style="text-align:center;padding:40px;color:var(--text-minor)">
+      <i class="fas fa-search" style="font-size:40px;opacity:0.3;display:block;margin-bottom:12px"></i>
+      Ничего не найдено
+    </td></tr>`;
+  } else {
+    items.forEach(it => {
+      html += `<tr data-id="${it._id}" class="${state.selectedId === it._id ? 'selected' : ''}">`;
+      cols.forEach(key => {
+        html += `<td>${renderCellContent(it, key, kind)}</td>`;
+      });
+      html += `</tr>`;
+    });
+  }
+  html += `</tbody></table></div>`;
+  contentArea.innerHTML = html;
+  
+  contentArea.querySelectorAll('tbody tr[data-id]').forEach(tr => {
+    tr.addEventListener('click', () => selectItem(parseInt(tr.dataset.id)));
+  });
+  contentArea.querySelectorAll('thead th[data-sort-field]').forEach(th => {
+    th.addEventListener('click', () => {
+      const field = th.dataset.sortField;
+      const currentField = state.sort.split('-')[0];
+      const currentDir = state.sort.split('-')[1];
+      if (field === currentField) {
+        state.sort = field + '-' + (currentDir === 'asc' ? 'desc' : 'asc');
+      } else {
+        state.sort = field + '-asc';
+      }
+      renderSortMenu();
+      renderContent();
+    });
+  });
+}
+
+function getSortFieldForKey(key) {
+  const map = {
+    name:'name', type:'type', surg:'surg', desc:'name', cost:'cost',
+    hl:'hl', source:'source', wa:'wa', damage:'damage', range:'range',
+    shots:'shots', rof:'shots', con:'wa', rel:'wa', meta:'name'
+  };
+  return map[key] || 'name';
+}
+
+function renderCellContent(item, key, kind) {
+  switch(key) {
+    case 'name': {
+      const cls = getNameColorClass(item);
+      return `<span class="name-cell ${cls}"><i class="fas ${item.icon || 'fa-cube'}" style="margin-right:8px;opacity:0.6;color:var(--accent)"></i>${escapeHtml(item.name)}</span>`;
+    }
+    case 'type': return escapeHtml(item.type || '-');
+    case 'surg': return escapeHtml(item.surg || '-');
+    case 'desc': return `<span style="color:var(--text-secondary);font-size:12px">${escapeHtml((item.desc || '').substring(0, 50))}${(item.desc || '').length > 50 ? '...' : ''}</span>`;
+    case 'cost': return `<span class="cost-cell">${formatCost(item.cost)}</span>`;
+    case 'hl': {
+      if (kind === 'weapon' || kind === 'gear') return '-';
+      const h = parseHL(item.hl);
+      const cls = h >= 15 ? 'high' : (h >= 5 ? 'mid' : '');
+      const style = cls === 'high' ? 'background:rgba(241,43,43,0.2);color:var(--color-red)' : (cls === 'mid' ? 'background:rgba(241,154,43,0.2);color:var(--color-orange)' : 'background:var(--bg-elev2);color:var(--text-minor)');
+      return `<span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:11px;${style}">${item.hl}</span>`;
+    }
+    case 'source': return `<span class="source-cell">${escapeHtml(item.source || '-')}</span>`;
+    case 'wa': {
+      if (item.wa === undefined) return '-';
+      const cls = item.wa > 0 ? 'wa-pos' : (item.wa < 0 ? 'wa-neg' : '');
+      return `<span class="${cls}">${item.wa > 0 ? '+' + item.wa : item.wa}</span>`;
+    }
+    case 'damage': return escapeHtml(item.damage || '-');
+    case 'range': return item.range ? item.range + 'm' : '-';
+    case 'shots': return item.shots !== undefined ? item.shots : '-';
+    case 'rof': return item.rof !== undefined ? item.rof : '-';
+    case 'con': return escapeHtml(item.con || '-');
+    case 'rel': {
+      if (!item.rel) return '-';
+      const cls = item.rel === 'VR' ? 'rel-vr' : (item.rel === 'UR' ? 'rel-ur' : '');
+      return `<span class="${cls}">${item.rel}</span>`;
+    }
+    case 'meta': {
+      if (kind === 'all') {
+        const itemKind = getCatalogKind(item.cat);
+        if (itemKind === 'weapon') {
+          return `<span style="color:var(--text-secondary);font-size:12px">${escapeHtml(item.damage || '')} | ${item.range || 0}m | WA ${item.wa > 0 ? '+' : ''}${item.wa || 0}</span>`;
+        } else if (itemKind === 'cyber') {
+          return `<span style="color:var(--text-secondary);font-size:12px">${escapeHtml((item.desc || '').substring(0, 40))}${(item.desc || '').length > 40 ? '...' : ''}</span>`;
+        } else {
+          return `<span style="color:var(--text-secondary);font-size:12px">${escapeHtml((item.desc || '').substring(0, 40))}</span>`;
+        }
+      }
+      return '-';
+    }
+    default: return '-';
+  }
+}
+
+function renderCards(items) {
+  if (items.length === 0) {
+    contentArea.innerHTML = `<div class="cards-wrap"><div class="empty-state">
+      <i class="fas fa-search"></i><h3>Ничего не найдено</h3>
+      <p>Попробуйте изменить параметры поиска или фильтры</p>
+    </div></div>`;
+    return;
+  }
+  
+  const kind = getCatalogKind(state.category);
+  const visibleCols = state.visibleColumns[kind] || DEFAULT_VISIBLE[kind];
+  
+  // Group by type
+  const groups = {};
+  items.forEach(it => {
+    const t = it.type || 'Без типа';
+    if (!groups[t]) groups[t] = [];
+    groups[t].push(it);
+  });
+  
+  let html = '<div class="cards-wrap">';
+  Object.keys(groups).sort().forEach(type => {
+    const list = groups[type];
+    html += `<div class="card-group">
+      <div class="card-group-header">
+        <div class="card-group-title">${escapeHtml(type)}</div>
+        <div class="card-group-count">${list.length}</div>
+      </div>
+      <div class="cards-grid">`;
+    list.forEach(it => {
+      const nameClass = getNameColorClass(it);
+      const colorCls = nameClass === 'rare' ? 'blue' : (nameClass === 'purple' ? 'purple' : (nameClass === 'orange' ? 'orange' : 'green'));
+      const sub = getCardSubtext(it, visibleCols, kind);
+      html += `<div class="card ${state.selectedId === it._id ? 'selected' : ''}" data-id="${it._id}">
+        <div class="card-image"><i class="fas ${it.icon || 'fa-cube'}"></i></div>
+        <div class="card-body">
+          <div class="card-name ${colorCls}">${escapeHtml(it.name)}</div>
+          <div class="card-sub">${sub}</div>
+          <div class="card-price">${formatCost(it.cost)}</div>
+        </div>
+      </div>`;
+    });
+    html += `</div></div>`;
+  });
+  html += '</div>';
+  contentArea.innerHTML = html;
+  
+  contentArea.querySelectorAll('.card').forEach(card => {
+    card.addEventListener('click', () => selectItem(parseInt(card.dataset.id)));
+  });
+}
+
+function getCardSubtext(item, visibleCols, kind) {
+  const parts = [];
+  if (kind === 'weapon') {
+    if (visibleCols.includes('wa') && item.wa !== undefined) {
+      parts.push((item.wa > 0 ? '+' : '') + item.wa);
+    }
+    if (visibleCols.includes('con')) parts.push(item.con || '-');
+    if (visibleCols.includes('damage')) parts.push(item.damage || '-');
+    if (visibleCols.includes('shots')) parts.push(item.shots);
+    if (visibleCols.includes('rof')) parts.push(item.rof);
+    if (visibleCols.includes('rel')) parts.push(item.rel || '-');
+    if (visibleCols.includes('range')) parts.push((item.range || 0) + 'm');
+  } else if (kind === 'cyber') {
+    if (visibleCols.includes('surg')) parts.push(item.surg || '-');
+    if (visibleCols.includes('desc') && item.desc) parts.push(item.desc.substring(0, 40));
+    if (visibleCols.includes('hl') && item.hl) parts.push('H.L. ' + item.hl);
+  } else if (kind === 'gear') {
+    if (visibleCols.includes('desc') && item.desc) parts.push(item.desc.substring(0, 60));
+  } else {
+    // all
+    const itemKind = getCatalogKind(item.cat);
+    if (itemKind === 'weapon') {
+      parts.push((item.damage || '') + ' | ' + (item.range || 0) + 'm');
+    } else if (itemKind === 'cyber') {
+      parts.push((item.desc || '').substring(0, 40));
+    } else {
+      parts.push((item.desc || '').substring(0, 60));
+    }
+  }
+  return parts.join(' | ') || '-';
+}
+
+function selectItem(id) {
+  state.selectedId = id;
+  const item = DB[id];
+  if (!item) return;
+  
+  document.querySelectorAll('[data-id]').forEach(el => {
+    el.classList.toggle('selected', parseInt(el.dataset.id) === id);
+  });
+  
+  detailPane.classList.remove('hidden');
+  detailTitle.textContent = item.name;
+  
+  const kind = getCatalogKind(item.cat);
+  const catNames = {
+    'fashionware':'Fashionware','neuralware':'Neuralware','cyberoptic':'Cyberoptic',
+    'cyberaudio':'Cyberaudio','cyberlimbs':'Cyberlimbs','cyberweapons':'Body Weapons',
+    'nanotech':'Nanotech','bioware':'Bioware','implants':'Implants','fullborgs':'Full Borgs',
+    'pistol-light':'Лёгкий пистолет','pistol-medium':'Средний пистолет','pistol-heavy':'Тяжёлый пистолет',
+    'smg':'Пистолет-пулемёт','shotgun':'Дробовик','rifle':'Штурмовая винтовка',
+    'sniper':'Снайперская винтовка','heavy':'Тяжёлое оружие','melee':'Оружие ближнего боя',
+    'clothing':'Одежда','gear':'Снаряжение','electronics':'Электроника'
+  };
+  
+  let html = `
+    <div class="detail-image">
+      <span class="category-tag">${catNames[item.cat] || item.cat}</span>
+      <i class="fas ${item.icon || 'fa-cube'}"></i>
+    </div>
+    <div class="detail-section">
+      <div class="detail-field">
+        <div class="detail-label">Название</div>
+        <div class="detail-value ${getNameColorClass(item) === 'rare' ? 'blue' : (getNameColorClass(item) === 'purple' ? 'purple' : (getNameColorClass(item) === 'orange' ? 'orange' : 'green'))}" style="font-size:16px;">${escapeHtml(item.name)}</div>
+      </div>
+      <div class="detail-field">
+        <div class="detail-label">Тип</div>
+        <div class="detail-value purple">${escapeHtml(item.type || '-')}</div>
+      </div>`;
+  
+  if (kind === 'weapon') {
+    html += `
+      <div class="stat-grid">
+        <div class="stat-box"><div class="stat-label">Урон</div><div class="stat-value">${escapeHtml(item.damage || '-')}</div></div>
+        <div class="stat-box"><div class="stat-label">Дальность</div><div class="stat-value">${item.range || 0}m</div></div>
+        <div class="stat-box"><div class="stat-label">Магазин</div><div class="stat-value">${item.shots !== undefined ? item.shots : '-'}</div></div>
+        <div class="stat-box"><div class="stat-label">Скорострельность</div><div class="stat-value">${item.rof !== undefined ? item.rof : '-'}</div></div>
+      </div>
+      <div class="detail-field" style="margin-top:12px;">
+        <div class="detail-label">Боеприпасы</div>
+        <div class="detail-value">${escapeHtml(item.ammo || '-')}</div>
+      </div>
+      <div class="detail-field">
+        <div class="detail-label">Точность (WA)</div>
+        <div class="detail-value ${item.wa > 0 ? 'cyan' : (item.wa < 0 ? 'orange' : '')}">${item.wa > 0 ? '+' : ''}${item.wa}</div>
+      </div>
+      <div class="detail-field">
+        <div class="detail-label">Скрытность</div>
+        <div class="detail-value">${escapeHtml(item.con || '-')}</div>
+      </div>
+      <div class="detail-field">
+        <div class="detail-label">Доступность</div>
+        <div class="detail-value green">${escapeHtml(item.avail || '-')}</div>
+      </div>
+      <div class="detail-field">
+        <div class="detail-label">Надёжность</div>
+        <div class="detail-value ${item.rel === 'VR' ? 'green' : (item.rel === 'UR' ? 'red' : '')}">${escapeHtml(item.rel || '-')}</div>
+      </div>`;
+  } else if (kind === 'cyber') {
+    html += `
+      <div class="detail-field">
+        <div class="detail-label">Описание</div>
+        <div class="detail-notes">${escapeHtml(item.desc || '-')}</div>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-box"><div class="stat-label">Сложность операции</div><div class="stat-value">${escapeHtml(item.surg || '-')}</div></div>
+        <div class="stat-box"><div class="stat-label">Потеря человечности</div><div class="stat-value ${parseHL(item.hl) >= 15 ? 'red' : ''}">${item.hl}</div></div>
+      </div>`;
+  } else {
+    html += `
+      <div class="detail-field">
+        <div class="detail-label">Описание</div>
+        <div class="detail-notes">${escapeHtml(item.desc || '-')}</div>
+      </div>`;
+  }
+  
+  html += `
+    <div class="detail-field">
+      <div class="detail-label">Цена</div>
+      <div class="detail-value highlight">${formatCost(item.cost)}</div>
+    </div>
+    <div class="detail-field">
+      <div class="detail-label">Источник</div>
+      <div class="detail-value purple">${escapeHtml(item.source || '-')}</div>
+    </div>
+  </div>`;
+  
+  detailBody.innerHTML = html;
+}
+
+// ============ EVENT LISTENERS ============
+document.getElementById('menuToggle').addEventListener('click', () => {
+  document.getElementById('sidebar').classList.toggle('collapsed');
+});
+
+document.getElementById('searchInput').addEventListener('input', (e) => {
+  state.search = e.target.value;
+  renderContent();
+});
+
+document.getElementById('viewTable').addEventListener('click', () => {
+  state.view = 'table';
+  document.getElementById('viewTable').classList.add('active');
+  document.getElementById('viewCards').classList.remove('active');
+  renderContent();
+});
+document.getElementById('viewCards').addEventListener('click', () => {
+  state.view = 'cards';
+  document.getElementById('viewCards').classList.add('active');
+  document.getElementById('viewTable').classList.remove('active');
+  renderContent();
+});
+
+// Filter button
+document.getElementById('filterBtn').addEventListener('click', () => {
+  const firstSelect = filtersBar.querySelector('select');
+  if (firstSelect) firstSelect.focus();
+});
+
+// Sort dropdown
+const sortDropdown = document.getElementById('sortDropdown');
+document.getElementById('sortBtn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  sortDropdown.classList.toggle('open');
+  columnsDropdown.classList.remove('open');
+});
+
+// Columns dropdown
+const columnsDropdown = document.getElementById('columnsDropdown');
+document.getElementById('columnsBtn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  columnsDropdown.classList.toggle('open');
+  sortDropdown.classList.remove('open');
+});
+
+document.addEventListener('click', (e) => {
+  if (!sortDropdown.contains(e.target)) sortDropdown.classList.remove('open');
+  if (!columnsDropdown.contains(e.target)) columnsDropdown.classList.remove('open');
+});
+
+document.getElementById('closeDetail').addEventListener('click', () => {
+  detailPane.classList.add('hidden');
+  state.selectedId = null;
+  document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
+});
+
+// ============ INIT ============
+function renderAll() {
+  renderSidebar();
+  renderViewTitle();
+  renderFilters();
+  renderSortMenu();
+  renderColumnsMenu();
+  renderContent();
+}
+renderAll();
+</script>
+</body>
+</html>
