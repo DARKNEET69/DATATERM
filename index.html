@@ -507,7 +507,7 @@ td.source-cell { color: var(--color-purple); font-size: 12px; }
   </header>
 
   <!-- GitHub Login Modal (Personal Access Token) -->
-  <div id="githubLoginModal" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:2000;display:flex;align-items:center;justify-content:center;">
+  <div id="githubLoginModal" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:2000;display:none;align-items:center;justify-content:center;">
     <div style="background:var(--bg-content);border-radius:12px;padding:32px;max-width:450px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,0.4);">
       <h2 style="color:var(--text-primary);font-size:20px;margin-bottom:8px;">Вход через GitHub</h2>
       <p style="color:var(--text-minor);font-size:13px;margin-bottom:20px;">Введите Personal Access Token для доступа к репозиторию. Токен хранится только в sessionStorage до закрытия вкладки.</p>
@@ -624,6 +624,7 @@ function closeGithubLoginModal() {
   const modal = document.getElementById('githubLoginModal');
   if (modal) {
     modal.classList.add('hidden');
+    modal.style.display = 'none';
   }
 }
 
@@ -651,6 +652,7 @@ function handleGithubLogin() {
   const modal = document.getElementById('githubLoginModal');
   if (modal) {
     modal.classList.remove('hidden');
+    modal.style.display = 'flex';
   }
 }
 
@@ -1588,6 +1590,12 @@ function renderAll() {
   renderContent();
   updateAuthUI();
 }
+
+// Expose functions to global scope for onclick handlers
+window.handleGithubLogin = handleGithubLogin;
+window.closeGithubLoginModal = closeGithubLoginModal;
+window.loginWithPAT = loginWithPAT;
+window.logoutGithub = logoutGithub;
 
 // Check for existing GitHub session on load
 (async () => {
