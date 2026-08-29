@@ -506,25 +506,30 @@ td.source-cell { color: var(--color-purple); font-size: 12px; }
     </div>
   </header>
 
-  <!-- OAuth Credentials Modal -->
-  <div id="oauthModal" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:2000;display:flex;align-items:center;justify-content:center;">
+  <!-- GitHub Login Modal (Personal Access Token) -->
+  <div id="githubLoginModal" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:2000;display:flex;align-items:center;justify-content:center;">
     <div style="background:var(--bg-content);border-radius:12px;padding:32px;max-width:450px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,0.4);">
-      <h2 style="color:var(--text-primary);font-size:20px;margin-bottom:8px;">GitHub OAuth Авторизация</h2>
-      <p style="color:var(--text-minor);font-size:13px;margin-bottom:20px;">Введите данные вашего GitHub OAuth App для авторизации. Данные хранятся только в sessionStorage текущей сессии.</p>
-      
-      <div style="margin-bottom:16px;">
-        <label style="display:block;color:var(--text-secondary);font-size:13px;margin-bottom:6px;">Client ID</label>
-        <input type="text" id="clientIdInput" placeholder="Iv1.xxxxxxxxxxxxxxxx" style="width:100%;background:var(--bg-elev);border:1px solid var(--border);border-radius:6px;padding:10px 12px;color:var(--text-primary);font-size:14px;outline:none;">
-      </div>
+      <h2 style="color:var(--text-primary);font-size:20px;margin-bottom:8px;">Вход через GitHub</h2>
+      <p style="color:var(--text-minor);font-size:13px;margin-bottom:20px;">Введите Personal Access Token для доступа к репозиторию. Токен хранится только в sessionStorage до закрытия вкладки.</p>
       
       <div style="margin-bottom:20px;">
-        <label style="display:block;color:var(--text-secondary);font-size:13px;margin-bottom:6px;">Client Secret</label>
-        <input type="password" id="clientSecretInput" placeholder="Your client secret" style="width:100%;background:var(--bg-elev);border:1px solid var(--border);border-radius:6px;padding:10px 12px;color:var(--text-primary);font-size:14px;outline:none;">
+        <label style="display:block;color:var(--text-secondary);font-size:13px;margin-bottom:6px;">GitHub Personal Access Token</label>
+        <input type="password" id="patInput" placeholder="ghp_xxxxxxxxxxxx или github_pat_xxxxx" style="width:100%;background:var(--bg-elev);border:1px solid var(--border);border-radius:6px;padding:10px 12px;color:var(--text-primary);font-size:14px;outline:none;">
       </div>
       
+      <div style="margin-bottom:20px;font-size:12px;color:var(--text-minor);line-height:1.6;">
+        <strong style="color:var(--color-blue);">Как получить токен:</strong><br>
+        1. Перейди на <a href="https://github.com/settings/tokens" target="_blank" style="color:var(--color-blue);text-decoration:underline;">github.com/settings/tokens</a><br>
+        2. Нажми "Generate new token (classic)"<br>
+        3. Выбери scope <code style="background:var(--bg-elev2);padding:2px 6px;border-radius:3px;">repo</code><br>
+        4. Скопируй токен и вставь выше
+      </div>
+      
+      <div id="loginErrorToast" class="hidden" style="background:rgba(241,43,43,0.1);border:1px solid var(--color-red);border-radius:6px;padding:10px;color:var(--color-red);font-size:13px;margin-bottom:16px;text-align:center;"></div>
+      
       <div style="display:flex;gap:10px;justify-content:flex-end;">
-        <button onclick="closeOAuthModal()" style="padding:10px 20px;background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--text-secondary);cursor:pointer;font-size:14px;">Отмена</button>
-        <button onclick="submitOAuthCredentials()" style="padding:10px 20px;background:var(--accent);border:none;border-radius:6px;color:#fff;cursor:pointer;font-size:14px;font-weight:500;">Продолжить</button>
+        <button onclick="closeGithubLoginModal()" style="padding:10px 20px;background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--text-secondary);cursor:pointer;font-size:14px;">Отмена</button>
+        <button onclick="loginWithPAT()" style="padding:10px 20px;background:var(--accent);border:none;border-radius:6px;color:#fff;cursor:pointer;font-size:14px;font-weight:500;">Войти</button>
       </div>
     </div>
   </div>
@@ -605,33 +610,26 @@ function logoutGithub() {
   renderAll();
 }
 
-// Show login error in header toast
+// Show login error in modal
 function showLoginError(msg) {
-  const authContainer = document.getElementById('auth-container');
-  if (!authContainer) return;
-  
-  // Create or update error toast
-  let errorEl = document.getElementById('loginErrorToast');
-  if (!errorEl) {
-    errorEl = document.createElement('div');
-    errorEl.id = 'loginErrorToast';
-    errorEl.style.cssText = 'position:fixed;top:70px;right:20px;background:#f38ba8;color:#1e1e2e;padding:12px 20px;border-radius:8px;z-index:1000;box-shadow:0 4px 12px rgba(0,0,0,0.3);font-size:13px;';
-    document.body.appendChild(errorEl);
+  const el = document.getElementById('loginErrorToast');
+  if (el) {
+    el.textContent = msg;
+    el.classList.remove('hidden');
   }
-  errorEl.textContent = msg;
-  errorEl.style.display = 'block';
-  
-  setTimeout(() => {
-    if (errorEl) errorEl.style.display = 'none';
-  }, 5000);
+}
+
+// Close GitHub login modal
+function closeGithubLoginModal() {
+  const modal = document.getElementById('githubLoginModal');
+  if (modal) {
+    modal.classList.add('hidden');
+  }
 }
 
 // Login with Personal Access Token
-async function loginWithToken() {
-  const tokenInput = document.getElementById('tokenInput');
-  if (!tokenInput) return;
-  
-  const token = tokenInput.value.trim();
+async function loginWithPAT() {
+  const token = document.getElementById('patInput').value.trim();
   if (!token) {
     showLoginError('Введите токен');
     return;
@@ -640,6 +638,7 @@ async function loginWithToken() {
   sessionStorage.setItem('github_token', token);
   const success = await checkGithubPermissions(token);
   if (success) {
+    closeGithubLoginModal();
     updateAuthUI();
     renderAll();
   } else {
@@ -647,64 +646,11 @@ async function loginWithToken() {
   }
 }
 
-async function handleGithubLogin() {
-  // Show OAuth credentials modal
-  const oauthModal = document.getElementById('oauthModal');
-  if (oauthModal) {
-    oauthModal.classList.remove('hidden');
-    oauthModal.style.display = 'flex';
-    return;
-  }
-  
-  const token = sessionStorage.getItem('github_token');
-  if (token) {
-    const success = await checkGithubPermissions(token);
-    if (success) {
-      updateAuthUI();
-      renderAll();
-      return;
-    }
-  }
-}
-
-// Show OAuth form and start authorization
-async function submitOAuthCredentials() {
-  const clientId = document.getElementById('clientIdInput').value.trim();
-  const clientSecret = document.getElementById('clientSecretInput').value.trim();
-  
-  if (!clientId || !clientSecret) {
-    showLoginError('Введите Client ID и Client Secret');
-    return;
-  }
-  
-  // Store credentials in sessionStorage only (not in code!)
-  sessionStorage.setItem('oauth_client_id', clientId);
-  sessionStorage.setItem('oauth_client_secret', clientSecret);
-  
-  closeOAuthModal();
-  
-  const REDIRECT_URI = window.location.origin + '/callback.html';
-  const authUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=repo`;
-  
-  const authWindow = window.open(authUrl, 'GitHub Auth', 'width=600,height=400');
-  
-  // Listen for messages from the callback window
-  window.addEventListener('message', async (event) => {
-    if (event.data.type === 'github-token' && event.data.token) {
-      sessionStorage.setItem('github_token', event.data.token);
-      await checkGithubPermissions(event.data.token);
-      updateAuthUI();
-      renderAll();
-    }
-  }, { once: false });
-}
-
-// Close OAuth modal
-function closeOAuthModal() {
-  const modal = document.getElementById('oauthModal');
+// Handle GitHub login button click - show PAT modal
+function handleGithubLogin() {
+  const modal = document.getElementById('githubLoginModal');
   if (modal) {
-    modal.classList.add('hidden');
-    modal.style.display = 'none';
+    modal.classList.remove('hidden');
   }
 }
 
