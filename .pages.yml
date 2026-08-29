@@ -1,0 +1,37 @@
+content:
+- name: Weapons
+  type: file
+  path: weapons.csv
+  fields:
+  - name: name
+    type: string
+  - name: type
+    type: string
+  - name: wa
+    type: number
+  - name: con
+    type: select
+    options:
+      values: [P, J, L, N]
+  - name: avail
+    type: select
+    options:
+      values: [E, C, P, R]
+  - name: damage
+    type: string
+  - name: ammo
+    type: string
+  - name: shots
+    type: number
+  - name: rof
+    type: number
+  - name: rel
+    type: select
+    options:
+      values: [UR, ST, VR]
+  - name: range
+    type: number
+  - name: cost
+    type: number
+  - name: source
+    type: string
