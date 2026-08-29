@@ -85,17 +85,23 @@ if (error) {
 }
 
 if (code) {
-  // Request OAuth credentials from opener window
-  window.opener.postMessage({ type: 'github-request-creds', code }, '*');
+  // Get OAuth credentials from sessionStorage
+  const clientId = sessionStorage.getItem('oauth_client_id');
+  const clientSecret = sessionStorage.getItem('oauth_client_secret');
   
-  document.getElementById('status').innerHTML = `
-    <div class="spinner"></div>
-    <p>Обмен кода на токен...</p>
-  `;
-  
-  // Listen for response from opener
-  window.addEventListener('message', async (event) => {
-    if (event.data.type === 'github-creds-response' && event.data.clientId && event.data.clientSecret) {
+  if (!clientId || !clientSecret) {
+    document.getElementById('status').innerHTML = `
+      <p class="error">OAuth credentials not found in sessionStorage</p>
+      <p class="error">Please try logging in again from the main page.</p>
+    `;
+    setTimeout(() => window.close(), 5000);
+  } else {
+    document.getElementById('status').innerHTML = `
+      <div class="spinner"></div>
+      <p>Обмен кода на токен...</p>
+    `;
+    
+    (async () => {
       try {
         const response = await fetch('https://github.com/login/oauth/access_token', {
           method: 'POST',
@@ -104,8 +110,8 @@ if (code) {
             'Accept': 'application/json'
           },
           body: JSON.stringify({
-            client_id: event.data.clientId,
-            client_secret: event.data.clientSecret,
+            client_id: clientId,
+            client_secret: clientSecret,
             code: code,
             redirect_uri: window.location.origin + '/callback.html'
           })
@@ -119,6 +125,8 @@ if (code) {
             window.opener.postMessage({ type: 'github-token', token: data.access_token }, '*');
             document.getElementById('status').innerHTML = '<p class="success">✓ Авторизация успешна! Окно закроется автоматически.</p>';
           } else {
+            // Store token in this window's sessionStorage for later use
+            sessionStorage.setItem('github_token', data.access_token);
             document.getElementById('status').innerHTML = '<p class="success">✓ Авторизация успешна! Закройте это окно и обновите основную страницу.</p>';
           }
           setTimeout(() => window.close(), 2000);
@@ -130,8 +138,8 @@ if (code) {
         document.getElementById('status').innerHTML = `<p class="error">Ошибка: ${e.message}</p>`;
         setTimeout(() => window.close(), 5000);
       }
-    }
-  });
+    })();
+  }
 }
 </script>
 </body>
