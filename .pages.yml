@@ -1,0 +1,5 @@
+content:
+  - name: weapons
+    type: file
+    path: weapons.json
+    format: datagrid
