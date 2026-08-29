@@ -3,6 +3,7 @@ content:
   type: file
   path: weapons.csv
   format: datagrid
+  list: true
   fields:
   - name: name
     type: string
