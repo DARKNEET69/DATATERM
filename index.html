@@ -586,12 +586,13 @@ async function checkGithubPermissions(token) {
     if (!userResponse.ok) return false;
     githubUser = await userResponse.json();
     
-    const permResponse = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/permission`, {
+    // Use /repos/{owner}/{repo} endpoint instead of /permission to avoid CORS issues
+    const repoResponse = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}`, {
       headers: { 'Authorization': `token ${token}` }
     });
-    if (permResponse.ok) {
-      const perm = await permResponse.json();
-      hasEditPermission = perm.push === true;
+    if (repoResponse.ok) {
+      const repo = await repoResponse.json();
+      hasEditPermission = repo.permissions && repo.permissions.push === true;
     }
     return true;
   } catch (e) {
