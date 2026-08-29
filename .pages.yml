@@ -2,3 +2,4 @@ content:
   - name: Weapons
     type: file
     path: weapons.csv
+    format: datagrid
