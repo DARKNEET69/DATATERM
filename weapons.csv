@@ -1,2 +1,3 @@
-"name", "type", "wa", "con", "avail", "damage", "ammo", "shots", "rof", "rel", "range", "cost", "source"
-"Budget Arms C-13", "Light Pistol", "-1", "P", "E", "1d6", "5mm", "8", "2", "ST", "50", "75", "CP20"
+name," ""type"""," ""wa"""," ""con"""," ""avail"""," ""damage"""," ""ammo"""," ""shots"""," ""rof"""," ""rel"""," ""range"""," ""cost"""," ""source"""
+Budget Arms C-13," ""Light Pistol"""," ""-1"""," ""P"""," ""E"""," ""1d6"""," ""5mm"""," ""8"""," ""2"""," ""ST"""," ""50"""," ""75"""," ""CP20"""
+Tokarev TT,,,,,,,,,,,,
