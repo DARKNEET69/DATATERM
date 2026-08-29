@@ -545,7 +545,7 @@ let hasEditPermission = false;
 const REPO_OWNER = 'DARKNEET69';
 const REPO_NAME = 'DATATERM';
 const REPO_PATH = 'main';
-];
+const DB_FILE_PATH = 'db.js';
 
 // ============ GITHUB AUTH FUNCTIONS ============
 async function checkGithubPermissions(token) {
@@ -573,13 +573,13 @@ async function checkGithubPermissions(token) {
 function logoutGithub() {
   githubUser = null;
   hasEditPermission = false;
-  localStorage.removeItem('github_token');
+  sessionStorage.removeItem('github_token');
   updateAuthUI();
   renderAll();
 }
 
 async function handleGithubLogin() {
-  const token = localStorage.getItem('github_token');
+  const token = sessionStorage.getItem('github_token');
   if (token) {
     const success = await checkGithubPermissions(token);
     if (success) {
@@ -588,14 +588,30 @@ async function handleGithubLogin() {
       return;
     }
   }
+  // IMPORTANT: Replace with your actual GitHub OAuth App Client ID
+  // Create OAuth App at: https://github.com/settings/developers
+  // Set callback URL to: http://localhost/callback.html (or your domain)
   const CLIENT_ID = 'Ov23liXXXXXXXXXXXX';
-  window.open(`https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}&scope=repo`, '_blank');
+  const REDIRECT_URI = window.location.origin + '/callback.html';
+  const authUrl = `https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=repo`;
+  
+  const authWindow = window.open(authUrl, 'GitHub Auth', 'width=600,height=400');
+  
+  // Listen for messages from the callback window
   window.addEventListener('message', async (event) => {
-    if (event.data.type === 'github-auth' && event.data.token) {
-      localStorage.setItem('github_token', event.data.token);
+    if (event.data.type === 'github-token' && event.data.token) {
+      sessionStorage.setItem('github_token', event.data.token);
       await checkGithubPermissions(event.data.token);
       updateAuthUI();
       renderAll();
+    }
+    // Handle credential request from callback window
+    if (event.data.type === 'github-request-creds' && oauthClientId && oauthClientSecret) {
+      event.source.postMessage({ 
+        type: 'github-creds-response', 
+        clientId: oauthClientId, 
+        clientSecret: oauthClientSecret 
+      }, event.origin);
     }
   });
 }
@@ -623,7 +639,7 @@ async function saveDBToGithub(content) {
     alert('No edit permission');
     return false;
   }
-  const token = localStorage.getItem('github_token');
+  const token = sessionStorage.getItem('github_token');
   try {
     const blobResponse = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${DB_FILE_PATH}?ref=${REPO_PATH}`);
     const blobData = await blobResponse.json();
@@ -1537,7 +1553,7 @@ function renderAll() {
 
 // Check for existing GitHub session on load
 (async () => {
-  const token = localStorage.getItem('github_token');
+  const token = sessionStorage.getItem('github_token');
   if (token) {
     await checkGithubPermissions(token);
   }
